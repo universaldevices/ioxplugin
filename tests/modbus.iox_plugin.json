@@ -1,0 +1,137 @@
+{
+    "plugin": {
+          "name":"modbus",
+          "description":"Modbus snippet",
+          "author":"UD",
+          "language": 0,
+          "executableName":"modbus.py",
+          "installScript":"install.sh",
+          "documentationLink":"docs",
+          "licenseLink":"lic",
+          "shortPoll":60,
+          "longPoll":600,
+          "profileVersion":"3.0.0",
+          "initialLogLevel":3,
+          "enableDiscovery":false,
+          "enableOAUTH2":false,
+          "worksOnPolisy":true,
+          "worksOnEisy":true,
+          "requiresIoXAccess": false
+    },
+    "editors": [
+        {
+            "id": "support_voltage",
+            "min": 42,
+            "max": 70,
+            "uom": "Volt | 72",
+            "scale": 0.001
+        },
+        {
+            "id": "dc_voltage",
+            "min": 36,
+            "max": 70,
+            "uom": "Volt | 72",
+            "scale": 0.001
+
+        },
+        {
+            "id": "sell_amps",
+            "min": 0,
+            "max": 27,
+            "uom": "Ampere (amp) | 1",
+            "scale": 0.001
+        },
+        {
+            "id": "load_shave_amps",
+            "min": 0,
+            "max": 48,
+            "uom": "Ampere (amp) | 1",
+            "scale": 0.001
+        },
+        {
+            "id": "load_shave",
+            "min": 0,
+            "max": 1,
+            "uom": "Index | 25",
+            "index_names": [
+                "Eanbled|1",
+                "Disabled|0"
+            ]
+        }
+    ],
+    "nodedefs": [
+        {
+            "id":"conext",
+            "protocol": {
+                "name": "Modbus",
+                "config": {
+                    "addressing_mode": "1-based",
+                    "communication_mode": "TCP"
+                }
+            }, 
+            "name":"Conext Inverter",
+            "icon":"Electricity",
+            "properties": [
+                {
+                    "id": "Custom Control 0 | GV0",
+                    "name": "Load Shave",
+                    "editor": {
+                        "idref": "load_shave"
+                    } ,
+                    "register_address": 434,
+                    "register_data_type": "uint16",
+                    "register_type": "holding",
+                    "is_settable": true
+                },
+                {
+                    "id":"Custom Control 1 | GV1",
+                    "name": "Grid Support Voltage",
+                    "editor": {
+                        "idref": "support_voltage"
+                    },
+                    "register_address": 376, 
+                    "register_data_type": "uint32",
+                    "register_type": "holding",
+                    "is_settable": true
+                },
+                {
+                    "id": "Custom Control 2 | GV2",
+                    "name": "Maximum Sell Amps",
+                    "editor": {
+                        "idref": "sell_amps"
+                    } ,
+                    "register_address": 436,
+                    "register_data_type": "uint32",
+                    "register_type": "holding",
+                    "is_settable": true
+                },
+                {
+                    "id": "Custom Control 3 | GV3",
+                    "name": "Load Shave Amps",
+                    "editor": {
+                        "idref": "load_shave_amps"
+                    } ,
+                    "register_address": 438,
+                    "register_data_type": "uint32",
+                    "register_type": "holding",
+                    "is_settable": true
+                },
+                {
+                    "id": "Custom Control 4 | GV4",
+                    "name": "DC Voltage ",
+                    "editor": {
+                        "idref": "dc_voltage"
+                    } ,
+                    "register_address": 80,
+                    "register_data_type": "uint32",
+                    "register_type": "input",
+                    "is_settable": false
+                }
+            ],
+            "commands": {
+                "accepts": [],
+                "sends": []
+            } 
+        }
+    ]
+}

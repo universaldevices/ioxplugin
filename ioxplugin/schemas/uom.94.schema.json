@@ -1,0 +1,29 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "string",
+    "description": "Appliance Alarm",
+    "enum": [
+      "Boiling | 8",
+      "Boiling Failure | 9",
+      "Compressor Failure | 21",
+      "Draining | 14",
+      "Draining Failure | 15",
+      "Drying | 18",
+      "Drying Failure | 19",
+      "Fan Failure | 20",
+      "Failure To Set Target Temperature | 5",
+      "Program Completed | 3",
+      "Program In Progress | 2",
+      "Program Started | 1",
+      "Replace Main Filter | 4",
+      "Rinsing | 12",
+      "Rinsing Failure | 13",
+      "Spinning | 16",
+      "Spinning Failure | 17",
+      "Supplying Water | 6",
+      "Washing | 10",
+      "Washing Failure | 11",
+      "Water Supply Failure | 7"
+    ]
+}
+  

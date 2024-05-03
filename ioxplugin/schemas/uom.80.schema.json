@@ -1,0 +1,17 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "string",
+    "description": "Thermostat fan run state",
+    "enum": [
+      "Circulation | 4",
+      "Humidity Circulation | 5",
+      "Off | 0",
+      "On | 1",
+      "On High | 2",
+      "On Medium | 3",
+      "Quiet Circulation | 8",
+      "Right/Left Circulation | 6",
+      "Up/Down Circulation | 7"
+    ]
+}
+  

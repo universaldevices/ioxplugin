@@ -1,0 +1,16 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "string",
+    "description": "Insteon Thermostat Mode - DO NOT USE",
+    "enum": [
+      "Auto | 3",
+      "Cool | 2",
+      "Fan Only | 4",
+      "Heat | 1",
+      "Off | 0",
+      "Program Auto | 5",
+      "Program Cool | 7",
+      "Program Heat | 6"
+    ]
+}
+  

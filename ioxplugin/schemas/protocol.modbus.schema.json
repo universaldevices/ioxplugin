@@ -1,0 +1,36 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type":"object",
+  "description": "This object defines various options for Modbus communications",
+  "properties":{
+        "communication_mode":{ 
+          "type":"string",
+          "oneOf": [
+            {
+              "enum":["TCP"],
+              "description": "Communicates over TCP sockets"
+            },
+            {
+              "enum":["Serial"],
+              "description": "Communicates over the serial port"
+            }
+          ],
+          "default":"TCP"
+        },
+        "addressing_mode":{
+          "type":"string",
+          "oneOf": [
+            {
+              "enum":["0-based"],
+              "description": "Register number is the same as register address"
+            },
+            {
+              "enum":["1-based"],
+              "description": "Register number register address + 1"
+            }
+          ],
+          "default":"1-based"
+        }
+      }
+}
+ 

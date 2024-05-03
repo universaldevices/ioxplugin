@@ -1,0 +1,83 @@
+
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "description": "Commands are communications between IoX and your plugin. _accepts_ are those that your plugin accepts and _sends_ are those that your plugin sends to iox such as change of state",
+  "properties": {
+    "accepts": {
+      "type": "array",
+      "description" : "Commands accepted by the plugin",
+      "items": {
+        "type":"object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "this is what identifies the command to your plugin"
+          },
+          "name": {
+            "type": "string",
+            "description": "NLS name presented to the clients"
+          },
+          "params": {
+            "type": "array",
+            "description":"Parameters for the command",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                   "pattern": "^[^\\s]+$"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "editor": {
+                  "$ref": "editor.schema.json",
+                   "pattern": "^[^\\s]+$"
+                }
+              },
+              "required": ["id", "name", "editor"]
+            }
+          }
+        },
+        "required": ["id", "name"]
+      }
+    },
+    "sends": {
+      "type": "array",
+      "items": {
+        "type":"object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[^\\s]+$"
+          },
+          "name": {
+            "type": "string"
+          },
+          "params": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "editor": {
+                  "$ref": "editor.schema.json"
+                }
+              },
+              "required": ["id", "name", "editor"]
+            }
+          }
+        },
+        "required": ["id", "name"]
+      }
+    }
+  },
+  "required": ["accepts", "sends"],
+  "additionalProperties": false
+}

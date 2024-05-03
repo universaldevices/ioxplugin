@@ -1,0 +1,146 @@
+
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "array",
+  "description":"Extends Node Properties with Modbus",
+  "items": {
+    "type": "object",
+    "properties":{
+      "id": {
+        "$ref": "properties.schema.json",
+        "description": "This is the property's id and how you will be able to reference is in python code."
+      },
+      "name": {
+        "type": "string",
+        "description": "This is the human readable name of this property such as Cool Setpoint. If there's an NLS file, this may be translated"
+      },
+      "register_type": {
+        "type":"string",
+        "oneOf": [
+          {
+            "enum":["coil"],
+            "description" : "Coil is like a switch that you can turn on/off"
+          },
+          {
+            "enum":["discrete-input"],
+            "description" : "Discrete Input is a read-only binary value (on/off)"
+          },
+          {
+            "enum":["input"],
+            "description" : "Input is a read-only unsigned 16 bit value"
+          },
+          {
+            "enum":["holding"],
+            "description" : "Holding is a read/write unsigned 16 bit value"
+          }
+        ],
+        "default":"holding"
+      },
+      "register_address": {
+        "type":"integer"
+      },
+      "register_data_type": {
+        "type":"string",
+        "oneOf": [
+          {
+            "enum":["int16"],
+            "description": "Signed 16 bit number"
+          },
+          {
+            "enum":["uint16"],
+            "description": "Unsigned 16 bit number"
+          },
+          {
+            "enum":["int32"],
+            "description": "Signed 32 bit number"
+          },
+          {
+            "enum":["uint32"],
+            "description": "Unsigned 32 bit number"
+          },
+          {
+            "enum":["float32"],
+            "description": "Signed 32 bit float"
+          },
+          {
+            "enum":["string"],
+            "description": "A string"
+          }
+        ],
+        "default": "unit16"
+      },
+      "num_registers":{
+        "type":"integer",
+        "default":1,
+        "description": "The number of registers to be written to or read from at the time. Mostry for string values."
+      },
+      "is_settable": {
+        "type": "boolean",
+        "default":false, 
+        "description": "Whether or not this property can also be set by the user. In the case of set, a command is created using the same UOM and editor"
+      },
+      "editor": {
+        "$ref": "editor.schema.json",
+        "description":"Editors help the UI with constraints ... "
+      },
+      "hide": {
+        "type":"boolean",
+        "description":"(Optional) Set to T or True, hides status in views but is available in program conditions",
+        "default":false
+      }
+    },
+    "allOf": [
+    {
+    "if": {
+      "anyOf": [
+        {
+          "properties" : 
+          {
+            "register_type": {
+              "const": "coil"
+            }
+          }
+        },
+        {
+          "properties" : 
+          {
+            "register_type": {
+              "const": "holding"
+            }
+          }
+        }
+      ]
+    },
+    "then":{
+      "properties": {
+        "is_settable": {
+          "const": true
+        }
+      }
+    },
+    "else":{
+      "properties": {
+        "is_settable": {
+          "const": false
+        }
+      }
+    }
+  },
+  {
+    "if":{
+      "properties": {
+        "register_data_type":
+        {
+          "const":"string"
+        }
+      }
+    },
+    "then":{
+        "required": ["num_registers"]
+    }
+  }
+  ],
+    "required": ["id", "register_address", "name", "is_settable", "editor"],
+    "additionalProperties": false
+  }
+}

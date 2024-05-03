@@ -1,0 +1,52 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type":"object",
+  "description": "This object defines various aspects of different protocols which are defined at node level",
+  "properties": {
+  "name":{
+        "type":"string",
+        "description": "Protocol for the underlying communications.",
+        "oneOf": [
+        {
+          "enum":["Proprietary"]
+        },
+        {
+          "enum":["Modbus"]
+        },
+        {
+          "enum":["Shelly"]
+        }
+        ],
+        "default":"Proprietary"
+  },
+  "config":{
+    "description":"Optional configuration parameters for a protocol"
+  }
+},
+"required": ["name"],
+"if":{
+      "properties":{
+        "name": {
+          "const": "Modbus"
+      }
+    }
+    },
+"then":
+    {
+      "properties":{
+        "config":{
+          "$ref": "protocol.modbus.schema.json"
+        }
+      }
+    },
+"else":
+    {
+      "properties":{
+        "config":{
+          "$ref": "protocol.generic.schema.json"
+        }
+      }
+    },
+  "additionalProperties": false
+}
+ 

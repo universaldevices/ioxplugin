@@ -9,7 +9,7 @@ setup(
     long_description_content_type='text/markdown',
     author='Michel Kohanim',
     author_email='support@universal-devices.com',
-    url='https://github.com/yourusername/simplegreet',
+    url='https://github.com/universaldevices/ioxplugin.git',
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",

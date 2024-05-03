@@ -1,0 +1,25 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "string",
+    "description": "Thermostat mode",
+    "enum": [
+      "Auto | 3",
+      "Auto Changeover | 10",
+      "Aux/Emergency Heat | 4",
+      "Away | 13",
+      "Cool | 2",
+      "Dry Air | 8",
+      "Energy Save Cool | 12",
+      "Energy Save Heat | 11",
+      "Fan Only | 6",
+      "Furnace | 7",
+      "Heat | 1",
+      "Moist Air | 9",
+      "Off | 0",
+      "Program Auto | 14",
+      "Program Cool | 16",
+      "Program Heat | 15",
+      "Resume | 5"
+    ]
+}
+  

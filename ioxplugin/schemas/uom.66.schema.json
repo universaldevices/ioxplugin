@@ -1,0 +1,20 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "string",
+    "description": "Thermostat heat/cool state",
+    "enum": [
+      "2nd Stage Aux Heat | 10",
+      "2nd Stage Cooling | 9",
+      "2nd Stage Heating | 8",
+      "3rd Stage Aux Heat | 11",
+      "Aux Heat | 7",
+      "Cooling | 2",
+      "Fan Only | 3",
+      "Heating | 1",
+      "Idle | 0",
+      "Pending Cool | 5",
+      "Pending Heat | 4",
+      "Vent | 6"
+    ]
+}
+  

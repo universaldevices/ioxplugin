@@ -1,0 +1,19 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "string",
+    "description": "Thermostat fan mode",
+    "enum": [
+      "Auto | 0",
+      "Auto High | 2",
+      "Auto Medium | 4",
+      "Circulation | 6",
+      "High | 3",
+      "Humidity Circulation | 7",
+      "Left & Right Circulation | 8",
+      "Medium | 5",
+      "On | 1",
+      "Quiet | 10",
+      "Up & Down Circulation | 9"
+    ]
+}
+  

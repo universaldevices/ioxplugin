@@ -1,0 +1,23 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "string",
+    "description": "Power Management Alarm",
+    "enum": [
+      "Ac Mains Disconnected | 2",
+      "Ac Mains Reconnected | 3",
+      "Battery Is Charging | 12",
+      "Battery Is Fully Charged | 13",
+      "Charge Battery Now | 15",
+      "Charge Battery Soon | 14",
+      "Load Error | 9",
+      "Over Current Detected | 6",
+      "Over Load Detected | 8",
+      "Over Voltage Detected | 7",
+      "Power Applied | 1",
+      "Replace Battery Now | 11",
+      "Replace Battery Soon | 10",
+      "Surge Detection | 4",
+      "Volt Drop Or Drift | 5"
+    ]
+}
+  

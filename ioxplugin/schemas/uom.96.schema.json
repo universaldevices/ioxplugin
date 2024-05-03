@@ -1,0 +1,12 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "string",
+    "description": "VOC Level",
+    "enum": [
+      "Clean | 1",
+      "Highly Polluted | 4",
+      "Moderately Polluted | 3",
+      "Slightly Polluted | 2"
+    ]
+}
+  

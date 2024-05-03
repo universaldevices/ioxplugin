@@ -1,0 +1,15 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "string",
+    "description": "Barrier Status",
+    "enum": [
+      "Closed | 0",
+      "Closing | 103",
+      "Open | 100",
+      "Opening | 104",
+      "Percent Closed (1% = almost Closed, 99% = almost Open) | 1-99",
+      "Stopped | 102",
+      "Unknown | 101"
+    ]
+  }
+  

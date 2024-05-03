@@ -1,0 +1,21 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "string",
+    "description": "Most recent On style action taken for lamp control",
+    "enum": [
+      "4 x Press (Off) | 10",
+      "4 x Press (On) | 9",
+      "5 x Press (Off) | 12",
+      "5 x Press (On) | 11",
+      "Fade Down | 3",
+      "Fade Stop | 4",
+      "Fade Up | 2",
+      "Fast Off | 6",
+      "Fast On | 5",
+      "Off | 1",
+      "On | 0",
+      "Triple Press (Off) | 8",
+      "Triple Press (On) | 7"
+    ]
+  }
+  

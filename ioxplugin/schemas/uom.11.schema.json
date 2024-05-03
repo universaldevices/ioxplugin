@@ -1,0 +1,11 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "string",
+  "description": "Deadbolt status",
+  "enum": [
+    "Jammed | 102",
+    "Unlocked | 0",
+    "Locked | 100",
+    "Unknown | 101"
+  ]
+}

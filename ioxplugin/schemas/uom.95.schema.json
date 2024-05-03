@@ -1,0 +1,13 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "string",
+    "description": "Home Health Alarm",
+    "enum": [
+      "Leaving Bed | 1",
+      "Lying On Bed | 3",
+      "Posture Changed | 4",
+      "Sitting On Bed | 2",
+      "Sitting On Edge Of Bed | 5"
+    ]
+}
+  

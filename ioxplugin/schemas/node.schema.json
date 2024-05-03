@@ -1,0 +1,58 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+       "protocol": {
+          "$ref": "protocol.schema.json"
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[^\\s]+$",
+          "description": "The id used to identify this node"
+        },
+        "name": {
+          "type": "string",
+          "description": "The human readable name. If you have NLS files, this name will be translated"
+        },
+        "parent": {
+          "type": "string",
+          "description": "If you have a controller / child relationship, parent is the id of the controller node"
+        },
+        "icon":{
+          "type": "string",
+          "$ref": "icon.schema.json"
+        },
+        "properties": {
+          "type": "array"
+        },
+        "commands": {
+          "$ref": "commands.schema.json"
+        }
+  },
+  "if": {
+    "properties":{
+        "protocol":{
+            "properties":{
+            "name":{
+              "const" : "Modbus"
+            }
+          }
+        }
+    }
+    },"then":{
+      "properties":{
+        "properties":{
+          "$ref": "modbus.node.properties.schema.json"
+        }
+      }
+    },"else":{
+      "properties":{
+        "properties":{
+          "$ref": "node.properties.schema.json"
+        }
+      }
+  },
+  "required": ["id", "name", "properties", "commands"],
+  "additionalProperties": false
+}
+ 

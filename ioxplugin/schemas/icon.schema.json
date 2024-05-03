@@ -1,0 +1,108 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "description": "You can either choose from the predefine list or provide a path to the file",
+    "oneOf": [
+        {
+            "properties":{
+                "path":{
+                    "type":"string"
+                }
+            },
+            "required": ["path"]
+        },
+        {
+            "oneOf": [
+                {
+                  "enum": ["Alarm"],
+                  "description": "Generic Alarm"
+                },
+                {
+                  "enum": ["Arm"],
+                  "description": "Arm an alarm system"
+                },
+                {
+                  "enum": ["DoorLock"],
+                  "description": "A door lock"
+                },
+                {
+                  "enum": ["Electricity"],
+                  "description": "Generic electricity"
+                },
+                {
+                  "enum": ["EnergyMonitor"],
+                  "description": "Energy monitor"
+                },
+                {
+                  "enum": ["GenericCtl"],
+                  "description": "Generic controller"
+                },
+                {
+                  "enum": ["GenericRsp"],
+                  "description": "Generic responder"
+                },
+                {
+                  "enum": ["GenericRspCtl"],
+                  "description": "Generic responder and controller"
+                },
+                {
+                  "enum": ["Input"],
+                  "description": "A sensor input"
+                },
+                {
+                  "enum": ["Irrigation"],
+                  "description": "Generic irrigation"
+                },
+                {
+                  "enum": ["Lamp"],
+                  "description": "A lamp"
+                },
+                {
+                  "enum": ["LampAndSwitch"],
+                  "description": "Represents both a lamp and a switch"
+                },
+                {
+                  "enum": ["MotionSensor"],
+                  "description": "A motion sensor"
+                },
+                {
+                  "enum": ["Output"],
+                  "description": "An output relay"
+                },
+                {
+                  "enum": ["PulseCounter"],
+                  "description": "A pulse counter"
+                },
+                {
+                  "enum": ["Sensor"],
+                  "description": "Generic sensor"
+                },
+                {
+                  "enum": ["Siren"],
+                  "description": "A siren"
+                },
+                {
+                  "enum": ["Switch"],
+                  "description": "A switch"
+                },
+                {
+                  "enum": ["SmokeSensor"],
+                  "description": "A smoke sensor"
+                },
+                {
+                  "enum": ["TempSensor"],
+                  "description": "A temperature sensor"
+                },
+                {
+                  "enum": ["Thermostat"],
+                  "description": "A thermostat"
+                },
+                {
+                  "enum": ["Weather"],
+                  "description": "Generic weather"
+                }
+              ]
+        }
+    ]
+}
+  

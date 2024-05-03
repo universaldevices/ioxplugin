@@ -1,2 +1,8 @@
 # ioxplugin
-IoX Plugin Helper allows you to create plugins from simple JSON files + creates all editors, nls, nodedefs and then generates python code for you
+ioxplugin is a python package that helps you create plugin code from simple JSON.
+
+Use pip to install:
+
+```bash
+pip install ioxplugin
+

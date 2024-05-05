@@ -18,6 +18,7 @@ class NodePropertyDetails:
         self.is_settable = False
         self.editor = None
         self.hide = False
+        self.protocol_data = None
 
         if node_property == None:
             return
@@ -34,6 +35,8 @@ class NodePropertyDetails:
                 self.editor = Editors.getEditors().addEditor(node_property['editor'])
             if 'hide' in node_property:
                 self.hide = node_property['hide']
+            if 'protocol' in node_property:
+                self.protocol_data = node_property['protocol']
         except Exception as ex:
             LOGGER.critical(str(ex))
             raise
@@ -89,6 +92,14 @@ class NodeProperties:
             return sts, nls
         except Exception as ex:
             LOGGER.critical(str(ex))
+
+    def getProtocolData(self):
+        out = {}
+        for np in self.node_properties:
+            node_property:NodePropertyDetails = self.node_properties[np]
+            out[node_property.id] = node_property.protocol_data
+
+        return out
 
     def getPG3Drivers(self):
         drivers = []

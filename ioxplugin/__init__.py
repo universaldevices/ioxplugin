@@ -14,4 +14,5 @@ from .nodedef import NodeDefDetails, NodeDefs, NodeProperties
 from .properties import Properties, PropertyDetails
 from .uom import UOMs, UOMDetails, UOMOption
 from .validator import getValidName
+from .iox_to_modbus import ModbusIoX
 from ioxplugin import ast_util

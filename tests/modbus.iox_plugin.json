@@ -23,30 +23,26 @@
             "id": "support_voltage",
             "min": 42,
             "max": 70,
-            "uom": "Volt | 72",
-            "scale": 0.001
+            "uom": "Volt | 72"
         },
         {
             "id": "dc_voltage",
             "min": 36,
             "max": 70,
-            "uom": "Volt | 72",
-            "scale": 0.001
+            "uom": "Volt | 72"
 
         },
         {
             "id": "sell_amps",
             "min": 0,
             "max": 27,
-            "uom": "Ampere (amp) | 1",
-            "scale": 0.001
+            "uom": "Ampere (amp) | 1"
         },
         {
             "id": "load_shave_amps",
             "min": 0,
             "max": 48,
-            "uom": "Ampere (amp) | 1",
-            "scale": 0.001
+            "uom": "Ampere (amp) | 1"
         },
         {
             "id": "load_shave",
@@ -78,9 +74,11 @@
                     "editor": {
                         "idref": "load_shave"
                     } ,
-                    "register_address": 434,
-                    "register_data_type": "uint16",
-                    "register_type": "holding",
+                    "protocol":{
+                        "register_address": 434,
+                        "register_data_type": "uint16",
+                        "register_type": "holding"
+                    },
                     "is_settable": true
                 },
                 {
@@ -89,9 +87,12 @@
                     "editor": {
                         "idref": "support_voltage"
                     },
-                    "register_address": 376, 
-                    "register_data_type": "uint32",
-                    "register_type": "holding",
+                    "protocol":{
+                        "register_address": 376, 
+                        "register_data_type": "uint32",
+                        "register_type": "holding",
+                        "scale":0.001
+                    },
                     "is_settable": true
                 },
                 {
@@ -100,9 +101,12 @@
                     "editor": {
                         "idref": "sell_amps"
                     } ,
-                    "register_address": 436,
-                    "register_data_type": "uint32",
-                    "register_type": "holding",
+                    "protocol":{
+                        "register_address": 436,
+                        "register_data_type": "uint32",
+                        "register_type": "holding",
+                        "scale": 0.001
+                    },
                     "is_settable": true
                 },
                 {
@@ -111,9 +115,12 @@
                     "editor": {
                         "idref": "load_shave_amps"
                     } ,
-                    "register_address": 438,
-                    "register_data_type": "uint32",
-                    "register_type": "holding",
+                    "protocol":{
+                        "register_address": 438,
+                        "register_data_type": "uint32",
+                        "register_type": "holding",
+                        "scale": 0.001
+                    },
                     "is_settable": true
                 },
                 {
@@ -122,9 +129,12 @@
                     "editor": {
                         "idref": "dc_voltage"
                     } ,
-                    "register_address": 80,
-                    "register_data_type": "uint32",
-                    "register_type": "input",
+                    "protocol":{
+                        "register_address": 80,
+                        "register_data_type": "uint32",
+                        "register_type": "input",
+                        "scale": 0.001
+                    },
                     "is_settable": false
                 }
             ],

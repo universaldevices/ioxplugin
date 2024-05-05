@@ -41,10 +41,6 @@
                     "precision":{
                         "type":"integer",
                         "description": "The precision for the number (optional)"
-                    },
-                    "scale":{
-                        "type":"number",
-                        "description": "The scale (division) for the number (optional)"
                     }
                 },
                 "if": {

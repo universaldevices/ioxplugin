@@ -1,6 +1,6 @@
 #test ioxplugin
 
-from ioxplugin import Plugin
+from ioxplugin import Plugin, ModbusIoX
 import os
 
 curdir = os.curdir
@@ -8,4 +8,5 @@ curdir = os.curdir
 
 plugin = Plugin("/usr/home/admin/workspace/ioxplugin/tests/modbus.iox_plugin.json", ".")
 plugin.toIoX()
-plugin.generateCode(".")
+ModbusIoX = ModbusIoX(plugin)
+#plugin.generateCode(".")

@@ -6,6 +6,7 @@ from .validator import getValidName
 from ioxplugin import ast_util 
 from .uom import UOMs
 from .editor import Editors
+from .iox_node_impl_gen import IoXNodeImplGen
 
 class IoXNodeGen():
     def __init__(self, nodedef:NodeDefDetails, path:str):
@@ -15,10 +16,11 @@ class IoXNodeGen():
 
         self.nodedef = nodedef
         self.path = path
+        self.node_impl_gen=IoXNodeImplGen(path, nodedef.getPythonImplFileName(), nodedef.getPythonImplClassName())
 
 
  
-    def create_command_body(self, command:CommandDetails):
+    def create_command_body(self, command:CommandDetails, command_name):
         if command == None:
             return None
         
@@ -27,6 +29,7 @@ class IoXNodeGen():
         
         out = []
         error = []
+        impl_args = []
 
         added_jparams=False
 
@@ -44,11 +47,17 @@ class IoXNodeGen():
                 added_jparams=True
             
             out.append(ast_util.astCommandParamAssignment(f'{param.id}.uom{editor.uom}', param.id))
+            impl_args.append(param.id)
 
-        out.append(ast_util.astReturnBoolean(True))
+        #out.append(ast_util.astReturnBoolean(True))
+        #now call the implementation
+        out.append(ast_util.astCallImplMethod(self.nodedef.getPythonImplInstanceName(), command_name, impl_args))
 
         error.append(ast_util.astLogger("error", "failed parsing parameters ... "))
         error.append(ast_util.astReturnBoolean(False))
+
+        if not self.nodedef.isController:
+            self.node_impl_gen.create_command_method(command_name, impl_args)
 
         return ast_util.astTryExcept(out, error)
 
@@ -71,6 +80,13 @@ class IoXNodeGen():
                 python_code = astor.to_source(import_stmt)
                 with open(file_path, 'a') as file:
                     file.write(python_code) 
+        else:
+            #import the implementation
+            import_stmt = ast_util.astCreateImportFrom(self.nodedef.getPythonImplClassName(), self.nodedef.getPythonImplClassName())
+            python_code = astor.to_source(import_stmt)
+            with open(file_path, 'a') as file:
+                file.write(python_code) 
+
 
         # Create the class for the node 
         class_def = ast.ClassDef(
@@ -114,6 +130,14 @@ class IoXNodeGen():
             LOGGER.critical(str(ex))
             raise
         
+        if len(commands)>0 and not self.nodedef.isController:
+            try:
+                self.node_impl_gen.create()
+            except Exception as ex:
+                LOGGER.critical(str(ex))
+                raise
+
+        
         if self.nodedef.isController:
             children_list = ast.Assign(
                 targets=[ast.Name(id='children', ctx=ast.Store())],
@@ -127,7 +151,7 @@ class IoXNodeGen():
             class_def.body.append(children_list)
 
         defaults=[self.nodedef.parent if self.nodedef.parent else self.nodedef.id,  self.nodedef.id,  self.nodedef.name]
-        class_def.body.append(ast_util.astAddClassInit(self.nodedef.isController, defaults))
+        class_def.body.append(ast_util.astAddClassInit(self.nodedef.isController, defaults, self.nodedef.getPythonImplClassName()))
         if self.nodedef.isController:
             class_def.body.append(ast_util.astParamHandlerFunc())
             class_def.body.append(ast_util.astConfigFunc())
@@ -201,6 +225,8 @@ class IoXNodeGen():
             )
             class_def.body.append(method)
 
+
+
         #now make the commands
         for command in commands:
             '''
@@ -223,8 +249,9 @@ class IoXNodeGen():
             '''
             cmd = self.nodedef.commands.acceptCommands[command['id']]
             pass_stmt = ast.Pass()
+            command_name=getValidName(command['name'],False)
             method = ast.FunctionDef(
-                name=getValidName(command['name'],False),
+                name=command_name,
                 args=ast.arguments(
                     args=[ast.arg(arg='self'), ast.arg(arg='command')],
                     defaults=[],
@@ -232,7 +259,7 @@ class IoXNodeGen():
                 ),
                 body=[
             #        pass_stmt
-                     self.create_command_body(cmd)
+                     self.create_command_body(cmd, command_name)
                 ],
                 keywords=[],
                 decorator_list=[]
@@ -252,7 +279,8 @@ class IoXNodeGen():
         )
         class_def.body.append(commands_list)
 
-
+        if not self.nodedef.isController:
+            self.node_impl_gen.finalize()
         return class_def
 
     

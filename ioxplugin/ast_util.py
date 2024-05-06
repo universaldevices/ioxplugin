@@ -2,8 +2,7 @@ import ast
 
 
 def astComment(comment):
-    return None
-    #return ast.Expr(value=ast.Constant(value=comment))
+    return ast.Expr(value=ast.Constant(value=comment))
 
 def astReturnBoolean(val:bool):
     # Create an AST node for 'return True'
@@ -215,8 +214,8 @@ def astCommandParamAssignment(param_uom, val_name, toInt=True):
         )
     )
 
-def astInitBody():
-    return [ast.Expr(value=ast.Call(
+def astInitBody(impl_class_name:str):
+    out = [ast.Expr(value=ast.Call(
         func=ast.Attribute(
             value=ast.Call(
                 func=ast.Name(id='super', ctx=ast.Load()),
@@ -234,6 +233,24 @@ def astInitBody():
         ],
         keywords=[]
     ))]
+
+    if impl_class_name:
+          # Create AST node for Impl(self) call
+        impl_call_node = ast.Call(
+            func=ast.Name(id=impl_class_name, ctx=ast.Load()),
+            args=[ast.Name(id='self', ctx=ast.Load())],
+        keywords=[]
+        )
+
+        inst_name = impl_class_name[0].lower() + impl_class_name[1:]
+        # Create AST node for self.impl = Impl(self) assignment
+        assign_node = ast.Assign(
+            targets=[ast.Attribute(value=ast.Name(id='self', ctx=ast.Load()), attr=inst_name, ctx=ast.Store())],
+            value=impl_call_node
+        )
+        out.append(assign_node)
+
+    return out
 
 def astInitBodyController():
     return [
@@ -286,9 +303,58 @@ def astInitBodyController():
         )),
     ]   
 
+def astAddImplClassInit():
+    # Create AST node for self.node = node assignment
+    assign_node = ast.Assign(
+        targets=[ast.Attribute(value=ast.Name(id='self', ctx=ast.Load()), attr='node', ctx=ast.Store())],
+        value=ast.Name(id='node', ctx=ast.Load())
+    )
 
-def astAddClassInit(is_controller, defaults_array):
-    init_body = astInitBody()
+    # Create AST node for method body
+    body_node = [assign_node]
+    function_def = ast.FunctionDef(
+        name='__init__',
+        args=ast.arguments(
+            posonlyargs=[],
+            args=[
+                ast.arg(arg='self'),
+                ast.arg(arg='node')
+            ],
+            defaults=[],
+            kwonlyargs=[],
+            kw_defaults=[],
+            vararg=None,
+            kwarg=None
+        ),
+        body=[
+            assign_node
+        ],
+        decorator_list=[],
+        returns=None
+    )
+
+    return function_def
+
+def astCallImplMethod(impl_instance_name, method_name, args_array):
+     # Create AST node for class attribute access
+    class_node = ast.Name(id=impl_instance_name, ctx=ast.Load())
+    method_node = ast.Attribute(value=class_node, attr=method_name, ctx=ast.Load())
+
+    # Create AST nodes for arguments
+    arg_nodes = [ast.Name(id=arg, ctx=ast.Load()) for arg in args_array]
+
+    # Create AST node for function call
+    call_node = ast.Call(
+        func=method_node,
+        args=arg_nodes,
+        keywords=[]
+    )
+
+    # Create AST node for expression statement
+    return ast.Return(value=call_node)
+
+def astAddClassInit(is_controller, defaults_array, impl_class_name):
+    init_body = astInitBody(None if is_controller else impl_class_name)
     if (is_controller):
        init_body += astInitBodyController()
 

@@ -6,7 +6,9 @@ ioxplugin/ast_util.py
 ioxplugin/commands.py
 ioxplugin/editor.py
 ioxplugin/iox_node_gen.py
+ioxplugin/iox_node_impl_gen.py
 ioxplugin/iox_profile.py
+ioxplugin/iox_to_modbus.py
 ioxplugin/log.py
 ioxplugin/main_gen.py
 ioxplugin/new_project.py
@@ -23,5 +25,8 @@ ioxplugin.egg-info/SOURCES.txt
 ioxplugin.egg-info/dependency_links.txt
 ioxplugin.egg-info/requires.txt
 ioxplugin.egg-info/top_level.txt
+tests/ConextInverterNode.py
+tests/ModbusControllerNode.py
 tests/__init__.py
+tests/modbus.py
 tests/test_ioxplugin.py

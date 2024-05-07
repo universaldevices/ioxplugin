@@ -14,6 +14,7 @@ from .log import init_ext_logging, LOGGER
 from .iox_profile import ProfileWriter
 from .iox_node_gen import IoXNodeGen
 from .main_gen import PluginMain
+from .protocol import Protocol
 import argparse
 
 
@@ -36,7 +37,9 @@ class Plugin:
         init_ext_logging(path)
         self.meta = None
         self.editors=Editors()
-        self.nodedefs:NodeDefs 
+        self.nodedefs:NodeDefs = None
+        self.protocol:Protocol = None
+        
         self.isValid = False
         if plugin_file == None:
             LOGGER.critical("plugin file does not exist ... ")
@@ -58,6 +61,8 @@ class Plugin:
             if 'nodedefs' in plugin_json:
                 self.nodedefs = NodeDefs(plugin_json['nodedefs'])
                 self.nodedefs.addController(f"{self.meta.getName().replace(' ','_').capitalize()} Controller")
+            if 'protocol' in plugin_json:
+                self.protocol = Protocol(plugin_json['protocol'])
 
         except Exception as ex:
             raise

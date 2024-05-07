@@ -55,16 +55,12 @@
             ]
         }
     ],
+    "protocol": {
+        "name": "Modbus"
+    },
     "nodedefs": [
         {
             "id":"conext",
-            "protocol": {
-                "name": "Modbus",
-                "config": {
-                    "addressing_mode": "1-based",
-                    "communication_mode": "TCP"
-                }
-            }, 
             "name":"Conext Inverter",
             "icon":"Electricity",
             "properties": [

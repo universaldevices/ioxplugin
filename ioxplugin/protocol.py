@@ -14,7 +14,10 @@ class Protocol:
     def __init__(self, protocol):
         if not protocol['name']:
             raise Exception("A protocol needs name ...")
+        self.config = None
         self.name = protocol['name']
+        if 'config' in protocol:
+            self.config = protocol['config']
 
     def isModbus(self):
         return self.name == "Modbus"

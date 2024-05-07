@@ -15,4 +15,5 @@ from .properties import Properties, PropertyDetails
 from .uom import UOMs, UOMDetails, UOMOption
 from .validator import getValidName
 from .iox_to_modbus import ModbusIoX
+from .iox_transport import IoXSerialTransport, IoXTCPTransport,IoXTransport
 from ioxplugin import ast_util

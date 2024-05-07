@@ -9,7 +9,6 @@ from .node_properties import NodeProperties
 from .commands import Commands
 from .log import LOGGER
 from .validator import validate_id
-from .protocol import Protocol
 
 
 class NodeDefDetails:
@@ -21,7 +20,6 @@ class NodeDefDetails:
         self.isController = False
         self.properties:NodeProperties
         self.commands:Commands
-        self.protocol:Protocol
 
         if node == None:
             LOGGER.critical("no node was given ... ")
@@ -39,8 +37,6 @@ class NodeDefDetails:
                 self.properties = NodeProperties(node['properties']) 
             if 'commands' in node:
                 self.commands=Commands(node['commands'])
-            if 'protocol' in node:
-                self.protocol=Protocol(node['protocol'])
 
         except Exception as ex:
             LOGGER.critical(str(ex))
@@ -74,24 +70,6 @@ class NodeDefDetails:
 
     def getPythonImplFileName(self):
         return f'{self.getPythonClassName()}_impl.py'
-
-    def isModbus(self):
-        try:
-            return self.protocol.isModbus()    
-        except Exception as ex:
-            return False
-
-    def isShelly(self):
-        try:
-            return self.protocol.isShelly()    
-        except Exception as ex:
-            return False
-
-    def isProprietary(self):
-        try:
-            return self.protocol.isProprietary()    
-        except Exception as ex:
-            return False
 
     def toIoX(self):
         nls = ""

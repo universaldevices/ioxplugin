@@ -10,6 +10,7 @@ import os
 from .node_properties import NodePropertyDetails, NodeProperties
 from .nodedef import NodeDefs, NodeDefDetails
 from .plugin import Plugin
+from .iox_transport import *
 
 MODBUS_REGISTER_TYPES=('coil', 'discrete-input', 'input', 'holding')
 MODBUS_REGISTER_DATA_TYPES=('int16','uint16','int32','uint32','float32','string')
@@ -17,109 +18,32 @@ MODBUS_REGISTER_DATA_TYPES=('int16','uint16','int32','uint32','float32','string'
 MODBUS_COMMUNICATION_MODES=('TCP', 'Serial')
 MODBUS_ADDRESSING_MODES=('0-based', '1-based')
 
-class ModbusTransport:
-    def __init__(self):
-        self.is_connected=False
-
-    def connect(self)->bool:
-        pass
-
-    def isConnected(self)->bool:
-        return self.is_connected
-
-class ModbusTCPTransport(ModbusTransport):
-    def __init__(self, comm_params):
-        if comm_params == None:
-            raise Exception ("Need communication parameters for TCP (host/port)")
-        self.host = None
-        self.port = None
-        try:
-            if 'host' in comm_params:
-                self.host = comm_params['host'] 
-            if 'port' in comm_params:
-                self.port = comm_params['port']
-
-            if host == None or port == None:
-                raise Exception ("Both host and ports are mandatory for connection ...")
-
-        except Exception as ex:
-            raise
-
-    def connect(self)->bool:
-        #make a connection and return 
-        pass
-
-class ModbusSerialTransport(ModbusTransport):
-    def __init__(self, comm_params):
-        if comm_params == None:
-            raise Exception ("Need communication parameters for serial (port/baudrate)")
-
-        self.port = None
-        self.baudrate = 115200
-        self.timeout=1
-        self.bytesize=serial.EIGHTBITS
-        self.parity=serial.PARITY_NONE 
-        self.stopbits=serial.STOPBITS_ONE
-        self.xonxoff=False
-        self.rtscts=False
-        self.dsrdtr=False
-
-        try:
-            if 'port' in comm_params:
-                self.port = comm_params['port']
-            if 'baudrate' in comm_params:
-                self.baudrate = comm_params['baudrate'] 
-            if 'timeout' in comm_params:
-                self.baudrate = comm_params['timeout'] 
-            if 'bytesize' in comm_params:
-                self.baudrate = comm_params['bytesize'] 
-            if 'parity' in comm_params:
-                self.baudrate = comm_params['parity'] 
-            if 'stopbits' in comm_params:
-                self.baudrate = comm_params['stopbits'] 
-            if 'xonxoff' in comm_params:
-                self.baudrate = comm_params['xonxoff'] 
-            if 'rtscts' in comm_params:
-                self.baudrate = comm_params['rtscts'] 
-            if 'dsrdtr' in comm_params:
-                self.baudrate = comm_params['dsrdtr'] 
-
-            if port == None:
-                raise Exception ("Need port such as ttyU0 ...")
-
-        except Exception as ex:
-            raise
-
-    def connect(self)->bool:
-        #make a connection and return 
-        pass
-
 
 class ModbusComm:
     def __init__(self, comm_data):
         if comm_data == None:
             raise Exception ("Need comm data for modbus ...")
             return
-        self.communication_mode = 'TCP'
         self.addressing_mode = '1-based'
-        self.transport:ModbusTransport = None
+        self._transport:IoXTransport = None
+        self.transport = None 
         try: 
-            if 'communication_mode' in comm_data:
-                self.communication_mode = comm_data['communication_mode']
+            if 'transport' in comm_data:
+                self._transport:IoXTransport = IoXTransport(comm_data['transport'])
             if 'addressing_mode' in comm_data:
                 self.addressing_mode = comm_data['addressing_mode']
         except Exception as ex:
             raise
 
     def connect(connection_params)->bool:
-        if not self.communication_mode in MODBUS_COMMUNICATION_MODES:
+        if not self._transport.getMode() in MODBUS_COMMUNICATION_MODES:
             raise Exception (f"{self.communication_mode} is not a valid communication mode for this plugin ..")
             return False
 
-        if self.communication_mode == 'TCP':
-            self.transport=ModbusTCPTransport(connection_params)
-        if self.communication_mode == 'Serial':
-            self.transport=ModbusSerialTransport(connection_params)
+        self.transport=self._transport.getTransport()
+        if self.transport == None:
+            raise Exception ("Invalid transport params ... ")
+            return False
 
         return self.transport.connect()
 
@@ -249,12 +173,15 @@ class ModbusIoX:
         if plugin == None or plugin.nodedefs == None:
             raise Exception ("No plugin and/or node definitions provided ...")
         try:
+            if not plugin.protocol.isModbus():
+                LOGGER.error("This plugin does not support modbus")
+                raise Exception("This plugin does not support modbus")
+
             nodedefs=plugin.nodedefs.getNodeDefs()
             for n in nodedefs: 
                 node:NodeDefDetails=nodedefs[n]
-                if not node.isModbus():
-                    continue
-                self.nodes[node.id]=ModbusIoXNode(node)
+                if not node.isController:
+                    self.nodes[node.id]=ModbusIoXNode(node)
         except Exception as ex:
             LOGGER.critical(str(ex))
             raise

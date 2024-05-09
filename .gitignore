@@ -8,4 +8,6 @@ ioxplugin/__pycache__/
 ioxplugin/__pycache__/*
 logs/
 logs/*
+tests/__pycache__/
+tests/__pycache__/*
 

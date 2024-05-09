@@ -142,7 +142,33 @@
                 }
             ],
             "commands": {
-                "accepts": [],
+                "accepts": [{
+                    "id": "reset",
+                    "name": "Reset Controller",
+                    "params": [
+                        {
+                            "editor": {
+                                "idref": "sell_amps"
+                            },
+                            "id": "p1",
+                            "name": "p1n"
+                        },
+                        {
+                            "editor": {
+                                "idref": "load_shave"
+                            },
+                            "id": "p2",
+                            "name": "p2n"
+                        },
+                        {
+                            "editor": {
+                                "idref": "load_shave_amps"
+                            },
+                            "id": "p3",
+                            "name": "p3n"
+                        }
+                    ]
+                }],
                 "sends": []
             } 
         }

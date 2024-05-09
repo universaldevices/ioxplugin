@@ -13,7 +13,7 @@ from .uom import UOMs
 from .editor import Editors
 
 PROCESS_COMMAND_TEMPLATE='''
-    def processCommand(self, command_name, **kwargs):
+    def processCommand(self, node, command_name, **kwargs):
         try:
             for key, value in kwargs.items():
                 print(f"{key}: {value}")
@@ -98,10 +98,10 @@ class IoXNodeImplGen():
         
         self.class_def.body.append(ast_util.astAddImplClassInit())
         self.class_def.body.append(ast_util.astComment('You need to implement these methods ....'))
-        self.class_def.body.append(self.create_command_method('setProperty', ['property_id', 'value']))
-        self.class_def.body.append(self.create_command_method('queryProperty', ['property_id']))
+        self.class_def.body.append(self.create_command_method('setProperty', ['node','property_id', 'value']))
+        self.class_def.body.append(self.create_command_method('queryProperty', ['node','property_id']))
         #self.class_def.body.append(self.create_command_method('processCommand', ['param_list']))
-        self.class_def.body.append(self.create_command_method('discover', None))
+        self.class_def.body.append(self.create_command_method('discover', ['node']))
         python_code = astor.to_source(self.class_def)
         with open(self.file_path, 'a') as file:
             file.write(python_code)

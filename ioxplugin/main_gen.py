@@ -5,6 +5,7 @@ from .plugin_meta import PluginMetaData
 from .log import LOGGER
 from ioxplugin import ast_util
 from .iox_node_gen import IoXNodeGen
+import os
 
 
 class PluginMain:
@@ -21,15 +22,32 @@ class PluginMain:
             return False
 
         file_path = f'{self.path}/{exec_name}'
-        imports = ast_util.astCreateImports()
-        python_code = astor.to_source(imports)
+        if os.path.exists(file_path):
+            return 
+
         with open(file_path, 'w') as file:
+            imports = ast_util.astCreateImports()
+            python_code = astor.to_source(imports)
+            file.write(python_code)
+            
+            version_import = ast_util.astCreateImport("version")
+            python_code = astor.to_source(version_import)
             file.write(python_code)
 
-        version_import = ast_util.astCreateImport("version")
-        python_code = astor.to_source(version_import)
-        with open(file_path, 'a') as file:
-            file.write(python_code)
+            #ioxplugin_import = ast_util.astCreateImport("ioxplugin")
+            #ioxplugin_code = astor.to_source(ioxplugin_import)
+            #file.write(ioxplugin_code)
+
+            ioxplugin_from_import = ast_util.astCreateImportFrom("ioxplugin","Plugin")
+            ioxplugin_code = astor.to_source(ioxplugin_from_import)
+            file.write(ioxplugin_code)
+
+            imp_from_import = ast_util.astCreateImportFrom(self.plugin_info.getPythonPHClassName(), 
+                    self.plugin_info.getPythonPHClassName())
+            ioxplugin_code = astor.to_source(imp_from_import)
+            file.write(ioxplugin_code)
+            file.write(f"\nPLUGIN_FILE_NAME = \'{self.plugin_info.plugin_file}\'\n")
+
 
         self.controllerNode = None
         children = []
@@ -59,7 +77,7 @@ class PluginMain:
             with open(file_path, 'a') as file:
                 file.write(python_code)
 
-        main_body = ast_util.astCreateMainFunc(self.controllerNode.getPythonClassName()) 
+        main_body = ast_util.astCreateMainFunc(self.controllerNode.getPythonClassName(), self.plugin_info.getPythonPHClassName()) 
         python_code = astor.to_source(main_body)
         with open(file_path, 'a') as file:
             file.write(python_code)

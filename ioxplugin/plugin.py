@@ -15,6 +15,7 @@ from .iox_profile import ProfileWriter
 from .iox_node_gen import IoXNodeGen
 from .main_gen import PluginMain
 from .protocol import Protocol
+from .iox_node_impl_gen import IoXNodeImplGen
 import argparse
 
 
@@ -56,6 +57,7 @@ class Plugin:
 
             if 'plugin' in plugin_json:
                 self.meta = PluginMetaData(plugin_json['plugin'])
+                self.meta.setPluginFile(plugin_file)
             if 'editors' in plugin_json:
                 self.editors.addEditors(plugin_json['editors'])
             if 'nodedefs' in plugin_json:
@@ -141,6 +143,12 @@ class Plugin:
         e = self.editors.validate()
 
         return n and e
+    
+    def getPythonPHClassName(self):
+        return self.meta.getPythonPHClassName()
+
+    def getPythonPHFileName(self):
+        return self.meta.getPythonPHFileName()
 
     def generateCode(self, path:str):
         try:
@@ -161,10 +169,13 @@ class Plugin:
             main = PluginMain(path, self.meta, self.nodedefs)
             main.create()
 
+            #now generate the proto handler/impl
+            node_impl_gen=IoXNodeImplGen(path, self.getPythonPHFileName(), self.getPythonPHClassName())
+            node_impl_gen.create()
+
         except Exception as ex:
             LOGGER.critical(str(ex))
             raise Exception(ex)
-
 
 def generate_code():
     project_path = "/usr/home/admin/workspace/plugin-dev/ext"

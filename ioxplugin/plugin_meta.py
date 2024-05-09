@@ -6,11 +6,16 @@ Copyright (C) 2024 Universal Devices
 """
 
 from .log import LOGGER
+import os
 
 class PluginMetaData:
 
     def __init__(self, metadata):
         self.metadata=metadata
+        self.plugin_file = None
+
+    def setPluginFile(self, plugin_file:str):
+        self.plugin_file = os.path.basename(plugin_file) 
 
     def getName(self):
         try:
@@ -137,3 +142,10 @@ class PluginMetaData:
         except Exception as ex:
             LOGGER.critical(str(ex))
             return None
+
+    def getPythonPHClassName(self):
+        name= f'{self.getName()}ProtocolHandler'.replace(' ','').replace('_','')
+        return name[0].upper()+name[1:]
+
+    def getPythonPHFileName(self):
+        return f'{self.getPythonPHClassName()}.py'

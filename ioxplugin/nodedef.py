@@ -58,18 +58,8 @@ class NodeDefDetails:
     def getPythonClassName(self):
         return f'{self.name}Node'.replace(' ','').replace('_','')
 
-    def getPythonImplClassName(self):
-        return f'{self.name}NodeProtocolHandler'.replace(' ','').replace('_','')
-
-    def getPythonImplInstanceName(self):
-        name = self.getPythonImplClassName()
-        return name[0].lower() + name[1:]
-
     def getPythonFileName(self):
         return f'{self.getPythonClassName()}.py'
-
-    def getPythonImplFileName(self):
-        return f'{self.getPythonImplClassName()}.py'
 
     def toIoX(self):
         nls = ""

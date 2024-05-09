@@ -8,8 +8,6 @@ from .uom import UOMs
 from .editor import Editors
 from .iox_node_impl_gen import IoXNodeImplGen
 
-USE_IMPL_FILE=False
-
 class IoXNodeGen():
     def __init__(self, nodedef:NodeDefDetails, path:str):
         if nodedef == None or path == None:
@@ -18,10 +16,7 @@ class IoXNodeGen():
 
         self.nodedef = nodedef
         self.path = path
-        if USE_IMPL_FILE:
-            self.node_impl_gen=IoXNodeImplGen(path, nodedef.getPythonImplFileName(), nodedef.getPythonImplClassName())
-
-
+        self.node_impl_gen=IoXNodeImplGen(path, nodedef.getPythonImplFileName(), nodedef.getPythonImplClassName())
  
     def create_command_body(self, command:CommandDetails, command_name):
         if command == None:
@@ -35,7 +30,7 @@ class IoXNodeGen():
         
         out = []
         error = []
-        impl_args = []
+        impl_args ={} 
 
         added_jparams=False
         is_property=command.init_prop != None
@@ -54,19 +49,15 @@ class IoXNodeGen():
                 added_jparams=True
             
             out.append(ast_util.astCommandParamAssignment(f'{param.id}.uom{editor.uom}', param.id))
-            impl_args.append(param.id)
-            if not USE_IMPL_FILE:
-                if is_property and not USE_IMPL_FILE:
-                    body = ast_util.astPHSetPropertyFunc(command_name.replace('set','update'), param.id)
-                    for stmt in body:
-                        out.append(stmt)
-                    break
+            impl_args[param.name if param.name else param.id]=param.id
+            if is_property:
+                body = ast_util.astPHSetPropertyFunc(command_name.replace('set','update'), param.id)
+                for stmt in body:
+                    out.append(stmt)
+                break
 
         #out.append(ast_util.astReturnBoolean(True))
-        #now call the implementation
-        if USE_IMPL_FILE:
-            out.append(ast_util.astCallImplMethod(self.nodedef.getPythonImplInstanceName(), command_name, impl_args))
-        else:
+        if not is_property:
             body = ast_util.astPHProcessCommandFunc(command_name, impl_args)
             if body:
                 for stmt in body:
@@ -74,10 +65,6 @@ class IoXNodeGen():
 
         error.append(ast_util.astLogger("error", "failed parsing parameters ... "))
         error.append(ast_util.astReturnBoolean(False))
-
-
-        if not self.nodedef.isController and USE_IMPL_FILE:
-            self.node_impl_gen.create_command_method(command_name, impl_args)
 
         return ast_util.astTryExcept(out, error)
 
@@ -102,11 +89,10 @@ class IoXNodeGen():
                     file.write(python_code) 
         else:
             #import the implementation
-            if USE_IMPL_FILE:
-                import_stmt = ast_util.astCreateImportFrom(self.nodedef.getPythonImplClassName(), self.nodedef.getPythonImplClassName())
-                python_code = astor.to_source(import_stmt)
-                with open(file_path, 'a') as file:
-                    file.write(python_code) 
+            import_stmt = ast_util.astCreateImportFrom(self.nodedef.getPythonImplClassName(), self.nodedef.getPythonImplClassName())
+            python_code = astor.to_source(import_stmt)
+            with open(file_path, 'a') as file:
+                file.write(python_code) 
 
 
         # Create the class for the node 
@@ -151,14 +137,6 @@ class IoXNodeGen():
             LOGGER.critical(str(ex))
             raise
         
-        if len(commands)>0 and not self.nodedef.isController and USE_IMPL_FILE:
-            try:
-                self.node_impl_gen.create()
-            except Exception as ex:
-                LOGGER.critical(str(ex))
-                raise
-
-        
         if self.nodedef.isController:
             children_list = ast.Assign(
                 targets=[ast.Name(id='children', ctx=ast.Store())],
@@ -173,7 +151,7 @@ class IoXNodeGen():
 
 
         defaults=[self.nodedef.parent if self.nodedef.parent else self.nodedef.id,  self.nodedef.id,  self.nodedef.name]
-        class_def.body.append(ast_util.astAddClassInit(self.nodedef.isController, defaults, self.nodedef.getPythonImplClassName() if USE_IMPL_FILE else None))
+        class_def.body.append(ast_util.astAddClassInit(self.nodedef.isController, defaults, None))
         if self.nodedef.isController:
             #set protocol handler
             class_def.body.append(ast_util.astSetPluginFunc())
@@ -258,10 +236,7 @@ class IoXNodeGen():
                 command_name=f"query{getValidName(driver['name'])}"
                 update_name=f"update{getValidName(driver['name'])}"
                 query_commands.append(command_name)
-                if USE_IMPL_FILE:
-                    body = ast_util.astCallImplMethod(self.nodedef.getPythonImplInstanceName(), command_name, [f"\"{driver['driver']}\""])
-                else:
-                    body = ast_util.astPHQueryPropertyFunc(update_name, driver['driver'])
+                body = ast_util.astPHQueryPropertyFunc(update_name, driver['driver'])
 
                 if not isinstance(body, list):
                     body = [body]
@@ -279,9 +254,6 @@ class IoXNodeGen():
                 decorator_list=[]
                 )
                 class_def.body.append(method)
-                if USE_IMPL_FILE:
-                    impl_args=['property_id']
-                    self.node_impl_gen.create_command_method(command_name, impl_args)
 
         if len (query_commands) > 0:
             class_def.body.append(ast_util.astQueryAllMethod(query_commands)) 
@@ -324,9 +296,12 @@ class IoXNodeGen():
         )
         class_def.body.append(commands_list)
 
-        if USE_IMPL_FILE:
-            if not self.nodedef.isController:
-                self.node_impl_gen.finalize()
+        if not self.nodedef.isController:
+            try:
+                self.node_impl_gen.create()
+            except Exception as ex:
+                LOGGER.critical(str(ex))
+                raise
         return class_def
 
     

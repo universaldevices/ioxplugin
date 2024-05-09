@@ -3,7 +3,7 @@
 This class creates an implemenation class for the Node class
 Methods of this class should be implemented by developers
 '''
-import ast, astor
+import ast, astor, os
 from .nodedef import NodeDefDetails, NodeProperties
 from .commands import CommandDetails, CommandParam
 from .log import LOGGER
@@ -11,6 +11,17 @@ from .validator import getValidName
 from ioxplugin import ast_util 
 from .uom import UOMs
 from .editor import Editors
+
+PROCESS_COMMAND_TEMPLATE='''
+    def processCommand(self, command_name, **kwargs):
+        try:
+            for key, value in kwargs.items():
+                print(f"{key}: {value}")
+            return True
+        except Exception as ex:
+            LOGGER.error(str(ex))
+            return False
+    '''
 
 class IoXNodeImplGen():
     def __init__(self, path:str, file_name:str, class_name:str):
@@ -35,9 +46,9 @@ class IoXNodeImplGen():
                ast_params.append(ast.arg(arg=param))
 
         return_true = ast_util.astReturnBoolean(True)
-        error.append(ast_util.astLogger("error", "command failed .... "))
+        error.append(ast_util.astLogger("error", f"{command_name} failed .... "))
         error.append(ast_util.astReturnBoolean(False))
-        body = ast_util.astTryExcept(return_true, error)
+        body = ast_util.astTryExcept([return_true], error)
     
 
         method = ast.FunctionDef(
@@ -47,17 +58,17 @@ class IoXNodeImplGen():
                     defaults=[],
                     kwonlyargs=[], kw_defaults=[], vararg=None, kwarg=None
                 ),
-                body=[
-                    return_true
-                ],
+                body=[body],
                 keywords=[],
                 decorator_list=[]
         )
-        self.class_def.body.append(method)
-
-
+        return method
 
     def create(self):
+        if os.path.exists(self.file_path): 
+            LOGGER.info(f"{self.file_path} already exists ... ignoring")
+            #do not redo if already exists
+            return
         imports = ast_util.astCreateImports()
         python_code = astor.to_source(imports)
         with open(self.file_path, 'w') as file:
@@ -85,33 +96,13 @@ class IoXNodeImplGen():
             decorator_list=[]
         )
         
-        #if self.nodedef.isController:
-        #    children_list = ast.Assign(
-        #        targets=[ast.Name(id='children', ctx=ast.Store())],
-        #        value=ast.List(elts=[
-        #            ast.Dict(
-        #                keys=[ast.Str(s='node_class'), ast.Str(s='id'), ast.Str(s='name'), ast.Str(s='parent')],
-        #                values=[ast.Str(s=child['node_class']), ast.Str(s=child['id']), ast.Str(s=child['name']), ast.Str(s=child['parent'])]
-        #            ) for child in children
-        #        ], ctx=ast.Load())
-        #    )
-        #    class_def.body.append(children_list)
-
-        #defaults=[]
         self.class_def.body.append(ast_util.astAddImplClassInit())
         self.class_def.body.append(ast_util.astComment('You need to implement these methods ....'))
-        #if self.nodedef.isController:
-        #    class_def.body.append(ast_util.astParamHandlerFunc())
-        #    class_def.body.append(ast_util.astConfigFunc())
-        #    class_def.body.append(ast_util.astStartFunc())
-        #    class_def.body.append(ast_util.astStopFunc())
-        #    class_def.body.append(ast_util.astPollFunc())
-        #    class_def.body.append(ast_util.astAddAllNodesFunc())
-        #    class_def.body.append(ast_util.astAddNodeFunc())
-
-        #create update and get methods
-
-    def finalize(self): 
+        self.class_def.body.append(self.create_command_method('setProperty', ['property_id', 'value']))
+        self.class_def.body.append(self.create_command_method('queryProperty', ['property_id']))
+        #self.class_def.body.append(self.create_command_method('processCommand', ['param_list']))
+        self.class_def.body.append(self.create_command_method('discover', None))
         python_code = astor.to_source(self.class_def)
         with open(self.file_path, 'a') as file:
-            file.write(python_code) 
+            file.write(python_code)
+            file.write(PROCESS_COMMAND_TEMPLATE) 

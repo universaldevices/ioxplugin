@@ -68,7 +68,7 @@
     "nodedefs": [
         {
             "id":"modbus",
-            "name":"Modbus Device",
+            "name":"ModbusDevice",
             "icon":"Electricity",
             "properties": [
                 {

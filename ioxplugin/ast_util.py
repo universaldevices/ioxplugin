@@ -1405,17 +1405,22 @@ def astPHQueryPropertyFunc(update_method, property):
     ]
     return body
 
-def astPHProcessCommandFunc(command_name, args_array):
+def astPHProcessCommandFunc(command_name, args):
 
-    arg_nodes = [ast.Name(id=command_name, ctx=ast.Load())] 
-    for arg in args_array:
-        arg_nodes.append(ast.Name(id=arg, ctx=ast.Load))
+    arg_nodes = [ast.Constant(value=command_name)] 
+    #for arg in args_array:
+    #    arg_nodes.append(ast.Name(id=arg, ctx=ast.Load))
     # Create AST node for function call
     return_statement = ast.Return(
             value=ast.Call(
-            func=ast.Name(id='self.plugin.processCommand', ctx=ast.Load()),
+            func=ast.Name(id='self.plugin.protocolHandler.processCommand', ctx=ast.Load()),
             args= arg_nodes,
-            keywords=[]  # No keyword arguments are used
+            keywords=[
+                ast.keyword(
+                    arg=key,
+                    value=ast.Name(id=val, ctx=ast.Load())
+                ) for key, val in args.items()
+            ]
         )
     )
 

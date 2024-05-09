@@ -59,7 +59,7 @@ class NodeDefDetails:
         return f'{self.name}Node'.replace(' ','').replace('_','')
 
     def getPythonImplClassName(self):
-        return f'{self.name}NodeImpl'.replace(' ','').replace('_','')
+        return f'{self.name}NodeProtocolHandler'.replace(' ','').replace('_','')
 
     def getPythonImplInstanceName(self):
         name = self.getPythonImplClassName()

@@ -25,7 +25,10 @@ class IoXNodeGen():
             return None
         
         if not command.hasParams():
-            return ast_util.astReturnBoolean(True)
+            if not self.nodedef.isController:
+                return ast_util.astReturnBoolean(True)
+            if command_name == "Query" and command.id == "query":
+                return ast_util.astQueryAllControllerCommand()
         
         out = []
         error = []
@@ -162,6 +165,7 @@ class IoXNodeGen():
             class_def.body.append(ast_util.astAddNodeFunc())
 
         #create update and get methods
+        query_commands=[]
 
         for driver in drivers:
             set_driver_call=ast.Call(
@@ -224,7 +228,31 @@ class IoXNodeGen():
             decorator_list=[]
             )
             class_def.body.append(method)
+            if not self.nodedef.isController:
+                ## Now queryriver
+                command_name=f"query{getValidName(driver['name'])}"
+                query_commands.append(command_name)
+                query_driver_call = ast_util.astCallImplMethod(self.nodedef.getPythonImplInstanceName(), command_name, [f"\"{driver['driver']}\""])
+                #return_stmt = ast.Return(value=query_driver_call)  # Return the result of update 
+                method = ast.FunctionDef(
+                name=command_name,
+                args=ast.arguments(
+                    args=[ast.arg(arg='self')],
+                    defaults=[],
+                    kwonlyargs=[], kw_defaults=[], vararg=None, kwarg=None
+                ),
+                body=[
+                    query_driver_call
+                ],
+                keywords=[],
+                decorator_list=[]
+                )
+                class_def.body.append(method)
+                impl_args=['property_id']
+                self.node_impl_gen.create_command_method(command_name, impl_args)
 
+        if len (query_commands) > 0:
+            class_def.body.append(ast_util.astQueryAllMethod(query_commands)) 
 
 
         #now make the commands
@@ -250,6 +278,9 @@ class IoXNodeGen():
             cmd = self.nodedef.commands.acceptCommands[command['id']]
             pass_stmt = ast.Pass()
             command_name=getValidName(command['name'],False)
+            body = self.create_command_body(cmd, command_name)
+            if not isinstance(body, list):
+                body = [body]
             method = ast.FunctionDef(
                 name=command_name,
                 args=ast.arguments(
@@ -257,10 +288,10 @@ class IoXNodeGen():
                     defaults=[],
                     kwonlyargs=[], kw_defaults=[], vararg=None, kwarg=None
                 ),
-                body=[
-            #        pass_stmt
-                     self.create_command_body(cmd, command_name)
-                ],
+                body=body,
+                #body=[
+                #     self.create_command_body(cmd, command_name)
+                #],
                 keywords=[],
                 decorator_list=[]
             )

@@ -69,7 +69,7 @@ class NodeDefDetails:
         return f'{self.getPythonClassName()}.py'
 
     def getPythonImplFileName(self):
-        return f'{self.getPythonClassName()}_impl.py'
+        return f'{self.getPythonImplClassName()}.py'
 
     def toIoX(self):
         nls = ""

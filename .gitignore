@@ -4,3 +4,8 @@ dist/
 dist/*
 __pycache__/
 __pycache__/*
+ioxplugin/__pycache__/
+ioxplugin/__pycache__/*
+logs/
+logs/*
+

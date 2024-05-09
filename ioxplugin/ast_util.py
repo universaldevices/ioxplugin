@@ -250,6 +250,18 @@ def astInitBody(impl_class_name:str):
         )
         out.append(assign_node)
 
+    #add protocol handler if any.
+    plugin_node = ast.Assign(
+            targets=[
+            ast.Attribute(
+                value=ast.Name(id='self', ctx=ast.Load()),
+                attr='plugin',
+                ctx=ast.Store()
+                )
+            ],
+            value=ast.Constant(value=None)
+        )
+    out.append(plugin_node)
     return out
 
 def astInitBodyController():
@@ -962,6 +974,23 @@ def astAddNodeFunc():
                                 args=[ast.Name(id='node', ctx=ast.Load())],
                                 keywords=[]
                             )),
+                            ast.Expr(
+                                value=ast.Call(
+                                    func=ast.Attribute(
+                                    value=ast.Name(id='node', ctx=ast.Load()),
+                                    attr='setPlugin',
+                                    ctx=ast.Load()
+                                ),
+                                args=[
+                                    ast.Attribute(
+                                    value=ast.Name(id='self', ctx=ast.Load()),
+                                    attr='plugin',
+                                    ctx=ast.Load()
+                                    )
+                                ],
+                                keywords=[]
+                                )
+                            ),
                             ast.Return(value=ast.Constant(value=True))
                         ]
                     )
@@ -1197,4 +1226,225 @@ def astQueryAllControllerCommand():
         )
     ]
     return body
+
+def astSetPluginFunc():
+    return ast.FunctionDef(
+    name='setPlugin',
+    args=ast.arguments(
+        posonlyargs=[],
+        args=[
+            ast.arg(arg='self', annotation=None),
+            ast.arg(arg='plugin', annotation=None)
+        ],
+        vararg=None,
+        kwonlyargs=[],
+        kw_defaults=[],
+        kwarg=None,
+        defaults=[]
+    ),
+    body=[
+        ast.Assign(
+            targets=[
+                ast.Attribute(
+                    value=ast.Name(id='self', ctx=ast.Load()),
+                    attr='plugin',
+                    ctx=ast.Store()
+                )
+            ],
+            value=ast.Name(id='plugin', ctx=ast.Load())
+        )
+    ],
+    decorator_list=[],
+    returns=None
+    )
+
+#protocol handler
+def astPHSetPropertyFunc(update_method, property):
+    
+    body=[
+    # Outer if statement
+        ast.If(
+            test=ast.BoolOp(
+            op=ast.And(),
+            values=[
+                ast.Name(id='self.plugin', ctx=ast.Load()),  # Checking self.plugin
+                ast.Attribute(
+                    value=ast.Attribute(
+                        value=ast.Name(id='self', ctx=ast.Load()),
+                        attr='plugin',
+                        ctx=ast.Load()
+                    ),
+                    attr='protocolHandler',
+                    ctx=ast.Load()
+                )
+            ]
+        ),
+        body=[
+            # Inner if statement
+            ast.If(
+                test=ast.Call(
+                    func=ast.Attribute(
+                        value=ast.Attribute(
+                            value=ast.Attribute(
+                                value=ast.Name(id='self', ctx=ast.Load()),
+                                attr='plugin',
+                                ctx=ast.Load()
+                            ),
+                            attr='protocolHandler',
+                            ctx=ast.Load()
+                        ),
+                        attr='setProperty',
+                        ctx=ast.Load()
+                    ),
+                    args=[
+                        ast.Name(id='self', ctx=ast.Load()),
+                        ast.Constant(value=property),
+                        ast.Name(id=property, ctx=ast.Load())
+                    ],
+                    keywords=[]
+                ),
+                body=[
+                    # Method call within the inner if statement
+                    ast.Expr(
+                        value=ast.Call(
+                            func=ast.Attribute(
+                                value=ast.Name(id='self', ctx=ast.Load()),
+                                attr=update_method,
+                                ctx=ast.Load()
+                            ),
+                            args=[
+                                ast.Name(id=property, ctx=ast.Load()),
+                                ast.Constant(value=True)
+                            ],
+                            keywords=[]
+                        )
+                    ),
+                    # Return statement within the inner if statement
+                    ast.Return(value=ast.Constant(value=True))
+                ],
+                orelse=[]
+            )
+        ],
+        orelse=[],
+    ),
+    ast.Return(value=ast.Constant(value=False))
+    ]
+    return body
+
+
+#protocol handler
+def astPHQueryPropertyFunc(update_method, property):
+    
+    body=[
+    # Outer if statement
+        ast.If(
+            test=ast.BoolOp(
+            op=ast.And(),
+            values=[
+                ast.Name(id='self.plugin', ctx=ast.Load()),  # Checking self.plugin
+                ast.Attribute(
+                    value=ast.Attribute(
+                        value=ast.Name(id='self', ctx=ast.Load()),
+                        attr='plugin',
+                        ctx=ast.Load()
+                    ),
+                    attr='protocolHandler',
+                    ctx=ast.Load()
+                )
+            ]
+        ),
+        body=[
+            # Assignment statement
+            ast.Assign(
+                targets=[ast.Name(id='val', ctx=ast.Store())],
+                value=ast.Call(
+                    func=ast.Attribute(
+                        value=ast.Attribute(
+                            value=ast.Name(id='self', ctx=ast.Load()),
+                            attr='plugin',
+                            ctx=ast.Load()
+                        ),
+                        attr='protocolHandler.queryProperty',
+                        ctx=ast.Load()
+                    ),
+                    args=[
+                        ast.Name(id='self', ctx=ast.Load()),
+                        ast.Constant(value=property)
+                    ],
+                    keywords=[]
+                )
+            ),
+            # Inner if statement
+            ast.If(
+                test=ast.Name(id='val', ctx=ast.Load()),
+                body=[
+                    # Method call within the inner if statement
+                    ast.Expr(
+                        value=ast.Call(
+                            func=ast.Attribute(
+                                value=ast.Name(id='self', ctx=ast.Load()),
+                                attr=update_method,
+                                ctx=ast.Load()
+                            ),
+                            args=[
+                                ast.Name(id='val', ctx=ast.Load()),
+                                ast.Constant(value=True)
+                            ],
+                            keywords=[]
+                        )
+                    ),
+                    # Return statement within the inner if statement
+                    ast.Return(value=ast.Constant(value=True))
+                ],
+                orelse=[]
+            )
+        ],
+        orelse=[],
+    ),
+    ast.Return(value=ast.Constant(value=False))
+    ]
+    return body
+
+def astPHProcessCommandFunc(command_name, args_array):
+
+    arg_nodes = [ast.Name(id=command_name, ctx=ast.Load())] 
+    for arg in args_array:
+        arg_nodes.append(ast.Name(id=arg, ctx=ast.Load))
+    # Create AST node for function call
+    return_statement = ast.Return(
+            value=ast.Call(
+            func=ast.Name(id='self.plugin.processCommand', ctx=ast.Load()),
+            args= arg_nodes,
+            keywords=[]  # No keyword arguments are used
+        )
+    )
+
+    body=[
+    # Outer if statement
+        ast.If(
+            test=ast.BoolOp(
+            op=ast.And(),
+            values=[
+                ast.Name(id='self.plugin', ctx=ast.Load()),  # Checking self.plugin
+                ast.Attribute(
+                    value=ast.Attribute(
+                        value=ast.Name(id='self', ctx=ast.Load()),
+                        attr='plugin',
+                        ctx=ast.Load()
+                    ),
+                    attr='protocolHandler',
+                    ctx=ast.Load()
+                )
+            ]
+        ),
+        body=[
+            return_statement
+        ],
+        orelse=[],
+    ),
+    ast.Return(value=ast.Constant(value=False))
+    ]
+    return body
+
+
 

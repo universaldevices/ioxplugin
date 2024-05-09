@@ -56,12 +56,19 @@
         }
     ],
     "protocol": {
-        "name": "Modbus"
+        "name": "Modbus",
+        "config": {
+            "transport": {
+                "mode": "TCP",
+                "host": "192.168.1.26",
+                "port": 502
+            }
+        } 
     },
     "nodedefs": [
         {
-            "id":"conext",
-            "name":"Conext Inverter",
+            "id":"modbus",
+            "name":"Modbus Device",
             "icon":"Electricity",
             "properties": [
                 {

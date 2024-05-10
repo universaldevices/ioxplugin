@@ -22,31 +22,31 @@ class PluginMain:
             return False
 
         file_path = f'{self.path}/{exec_name}'
-        if os.path.exists(file_path):
-            return 
+        create_main = not os.path.exists(file_path)
+        if create_main:
+            #do not recreate the main
+            with open(file_path, 'w') as file:
+                imports = ast_util.astCreateImports()
+                python_code = astor.to_source(imports)
+                file.write(python_code)
+                
+                version_import = ast_util.astCreateImport("version")
+                python_code = astor.to_source(version_import)
+                file.write(python_code)
 
-        with open(file_path, 'w') as file:
-            imports = ast_util.astCreateImports()
-            python_code = astor.to_source(imports)
-            file.write(python_code)
-            
-            version_import = ast_util.astCreateImport("version")
-            python_code = astor.to_source(version_import)
-            file.write(python_code)
+                #ioxplugin_import = ast_util.astCreateImport("ioxplugin")
+                #ioxplugin_code = astor.to_source(ioxplugin_import)
+                #file.write(ioxplugin_code)
 
-            #ioxplugin_import = ast_util.astCreateImport("ioxplugin")
-            #ioxplugin_code = astor.to_source(ioxplugin_import)
-            #file.write(ioxplugin_code)
+                ioxplugin_from_import = ast_util.astCreateImportFrom("ioxplugin","Plugin")
+                ioxplugin_code = astor.to_source(ioxplugin_from_import)
+                file.write(ioxplugin_code)
 
-            ioxplugin_from_import = ast_util.astCreateImportFrom("ioxplugin","Plugin")
-            ioxplugin_code = astor.to_source(ioxplugin_from_import)
-            file.write(ioxplugin_code)
-
-            imp_from_import = ast_util.astCreateImportFrom(self.plugin_info.getPythonPHClassName(), 
-                    self.plugin_info.getPythonPHClassName())
-            ioxplugin_code = astor.to_source(imp_from_import)
-            file.write(ioxplugin_code)
-            file.write(f"\nPLUGIN_FILE_NAME = \'{self.plugin_info.plugin_file}\'\n")
+                imp_from_import = ast_util.astCreateImportFrom(self.plugin_info.getPythonPHClassName(), 
+                        self.plugin_info.getPythonPHClassName())
+                ioxplugin_code = astor.to_source(imp_from_import)
+                file.write(ioxplugin_code)
+                file.write(f"\nPLUGIN_FILE_NAME = \'{self.plugin_info.plugin_file}\'\n")
 
 
         self.controllerNode = None
@@ -66,30 +66,27 @@ class PluginMain:
                         'parent': None
                     }
                 )
-            import_stmt = ast_util.astCreateImportFrom(nd.getPythonClassName(), nd.getPythonClassName())
-            python_code = astor.to_source(import_stmt)
+
+        if create_main:
             with open(file_path, 'a') as file:
+                import_stmt = ast_util.astCreateImportFrom(nd.getPythonClassName(), nd.getPythonClassName())
+                python_code = astor.to_source(import_stmt)
                 file.write(python_code)
 
-        global_defs = ast_util.astCreateGlobals(True)
-        for global_def in global_defs:
-            python_code = astor.to_source(global_def)
-            with open(file_path, 'a') as file:
-                file.write(python_code)
+                global_defs = ast_util.astCreateGlobals(True)
+                for global_def in global_defs:
+                    python_code = astor.to_source(global_def)
+                    file.write(python_code)
 
-        main_body = ast_util.astCreateMainFunc(self.controllerNode.getPythonClassName(), self.plugin_info.getPythonPHClassName()) 
-        python_code = astor.to_source(main_body)
-        with open(file_path, 'a') as file:
-            file.write(python_code)
+                main_body = ast_util.astCreateMainFunc(self.controllerNode.getPythonClassName(), self.plugin_info.getPythonPHClassName()) 
+                python_code = astor.to_source(main_body)
+                file.write(python_code)
 
         for child in children:
             child['parent'] = self.controllerNode.id
 
         for ndi in nodedefs:
             ndef = nodedefs[ndi]
-            file_path=f'{self.path}/{ndef.getPythonFileName()}'
+            #file_path=f'{self.path}/{ndef.getPythonFileName()}'
             ngen = IoXNodeGen(ndef, self.path)
             nc = ngen.create(children)
-            python_code = astor.to_source(nc)
-            with open(file_path, 'a') as file:
-                    file.write(python_code)

@@ -1177,6 +1177,26 @@ def astCreateMainFunc(controller, protocolHandler):
 
     return main_if
 
+def astDiscoverControllerCommand():
+    return_statement = ast.Return(
+        value = ast.Call(
+        func=ast.Attribute(
+            value=ast.Attribute(
+                value=ast.Name(id='self', ctx=ast.Load()),
+                attr='protocolHandler',
+                ctx=ast.Load()
+            ),
+            attr='discover',
+            ctx=ast.Load()
+        ),
+        args=[],
+        keywords=[]
+    )
+    )
+    body=[
+       return_statement 
+    ]
+    return body
 
 def astQueryAllControllerCommand():
     body=[

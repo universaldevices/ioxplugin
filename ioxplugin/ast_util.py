@@ -277,16 +277,21 @@ def astInitBodyController():
                 keywords=[]
             )
         ),
+        #Setting oauthService 
+        ast.Assign(
+            targets=[ast.Attribute(value=ast.Name(id='self', ctx=ast.Load()), attr='oauthService', ctx=ast.Store())],
+            value=ast.Constant(value=None)
+        ),
         # Setting valid_configuration attribute
-        ast.Assign(
-            targets=[ast.Attribute(value=ast.Name(id='self', ctx=ast.Load()), attr='valid_configuration', ctx=ast.Store())],
-            value=ast.Constant(value=False)
-        ),
+        #ast.Assign(
+        #    targets=[ast.Attribute(value=ast.Name(id='self', ctx=ast.Load()), attr='valid_configuration', ctx=ast.Store())],
+        #    value=ast.Constant(value=False)
+        #),
         # Setting started attribute
-        ast.Assign(
-            targets=[ast.Attribute(value=ast.Name(id='self', ctx=ast.Load()), attr='started', ctx=ast.Store())],
-            value=ast.Constant(value=False)
-        ),
+        #ast.Assign(
+        #    targets=[ast.Attribute(value=ast.Name(id='self', ctx=ast.Load()), attr='started', ctx=ast.Store())],
+        #    value=ast.Constant(value=False)
+        #),
         # Multiple subscribe method calls
         ast.Expr(value=ast.Call(
             func=ast.Attribute(value=ast.Attribute(value=ast.Name(id='self', ctx=ast.Load()), attr='poly', ctx=ast.Load()), attr='subscribe', ctx=ast.Load()),
@@ -310,9 +315,43 @@ def astInitBodyController():
         )),
         ast.Expr(value=ast.Call(
             func=ast.Attribute(value=ast.Attribute(value=ast.Name(id='self', ctx=ast.Load()), attr='poly', ctx=ast.Load()), attr='subscribe', ctx=ast.Load()),
-            args=[ast.Attribute(value=ast.Name(id='polyglot', ctx=ast.Load()), attr='CONFIG', ctx=ast.Load()), ast.Attribute(value=ast.Name(id='self', ctx=ast.Load()), attr='config', ctx=ast.Load())],
+            args=[ast.Attribute(value=ast.Name(id='polyglot', ctx=ast.Load()), attr='CONFIG', ctx=ast.Load()), ast.Attribute(value=ast.Name(id='self', ctx=ast.Load()), attr='configHandler', ctx=ast.Load())],
             keywords=[]
         )),
+        ast.Expr(value=ast.Call(
+            func=ast.Attribute(value=ast.Attribute(value=ast.Name(id='self', ctx=ast.Load()), attr='poly', ctx=ast.Load()), attr='subscribe', ctx=ast.Load()),
+            args=[ast.Attribute(value=ast.Name(id='polyglot', ctx=ast.Load()), attr='CONFIGDONE', ctx=ast.Load()), ast.Attribute(value=ast.Name(id='self', ctx=ast.Load()), attr='configDoneHandler', ctx=ast.Load())],
+            keywords=[]
+        )),
+        ast.Expr(value=ast.Call(
+            func=ast.Attribute(value=ast.Attribute(value=ast.Name(id='self', ctx=ast.Load()), attr='poly', ctx=ast.Load()), attr='subscribe', ctx=ast.Load()),
+            args=[ast.Attribute(value=ast.Name(id='polyglot', ctx=ast.Load()), attr='ADDNODEDONE', ctx=ast.Load()), ast.Attribute(value=ast.Name(id='self', ctx=ast.Load()), attr='addNodeDoneHandler', ctx=ast.Load())],
+            keywords=[]
+        )),
+        ast.Expr(value=ast.Call(
+            func=ast.Attribute(value=ast.Attribute(value=ast.Name(id='self', ctx=ast.Load()), attr='poly', ctx=ast.Load()), attr='subscribe', ctx=ast.Load()),
+            args=[ast.Attribute(value=ast.Name(id='polyglot', ctx=ast.Load()), attr='CUSTOMNS', ctx=ast.Load()), ast.Attribute(value=ast.Name(id='self', ctx=ast.Load()), attr='customNSHandler', ctx=ast.Load())],
+            keywords=[]
+        )),
+        ast.Expr(value=ast.Call(
+            func=ast.Attribute(value=ast.Attribute(value=ast.Name(id='self', ctx=ast.Load()), attr='poly', ctx=ast.Load()), attr='subscribe', ctx=ast.Load()),
+            args=[ast.Attribute(value=ast.Name(id='polyglot', ctx=ast.Load()), attr='OAUTH', ctx=ast.Load()), ast.Attribute(value=ast.Name(id='self', ctx=ast.Load()), attr='oauthHandler', ctx=ast.Load())],
+            keywords=[]
+        )),
+        ast.Expr(value=ast.Call(
+            func=ast.Attribute(value=ast.Attribute(value=ast.Name(id='self', ctx=ast.Load()), attr='poly', ctx=ast.Load()), attr='subscribe', ctx=ast.Load()),
+            args=[ast.Attribute(value=ast.Name(id='polyglot', ctx=ast.Load()), attr='CUSTOMDATA', ctx=ast.Load()), ast.Attribute(value=ast.Name(id='self', ctx=ast.Load()), attr='customDataHandler', ctx=ast.Load())],
+            keywords=[]
+        )),
+        ast.Expr(value=ast.Call(
+            func=ast.Attribute(
+                value=ast.Name(id='self', ctx=ast.Load()),
+                attr='initOAuth',
+                ctx=ast.Load()
+            ),
+            args=[],  # No arguments are passed to the function
+            keywords=[]  # No keyword arguments
+        ))
     ]   
 
 def astAddImplClassInit():

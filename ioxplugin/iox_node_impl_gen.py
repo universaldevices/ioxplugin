@@ -143,6 +143,38 @@ class __PROTOCOL_HANDLER_CLASS__:
             return False
 
     ####
+    # This method is called with the configuration is done. This is rarely used as its main function is to facilitate 
+    ####
+    def configDone(self)->bool:
+        try:
+            return True
+        except Exception as ex:
+            LOGGER.error(str(ex))
+            return False
+
+    ####
+    # This method is called with custom data. Rarely used ...  
+    ####
+    def customData(self, data)->bool:
+        try:
+            return True
+        except Exception as ex:
+            LOGGER.error(str(ex))
+            return False
+
+    ####
+    # This method is called when adding a node to the system is completed successfully. Make sure you use isinstance
+    # to ensure it's your node and then do any additional processing necessary.
+    # oauth
+    ####
+    def addNodeDone(self, node)->bool:
+        try:
+            return True
+        except Exception as ex:
+            LOGGER.error(str(ex))
+            return False
+
+    ####
     # This method is called when files are uplaoded. The path is the directory to which you can find the files
     # Do whatever you need with the files because they will be removed once you are done.
     ####
@@ -216,6 +248,12 @@ class __PROTOCOL_HANDLER_CLASS__:
     def getNode(self, address:str):
         return self.controller.poly.getNode()
 
+    ###
+    # If your plugin is an OAuth client, use this method to call APIs that 
+    # automatically include all the tokens for authorization and authentication 
+    ###
+    def callOAuthApi(self, method='GET', url=None, params=None, body=None)->bool:
+        return self.controller.callOAuthApi(method, url, params, body)
 
     '''
 

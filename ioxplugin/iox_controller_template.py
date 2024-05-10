@@ -1,7 +1,10 @@
 CONTROLLER_TEMPLATE_HEADER='''
 import udi_interface, os, sys, json, time
+from udi_interface import OAuth
 LOGGER = udi_interface.LOGGER
 Custom = udi_interface.Custom
+from ioxplugin import Plugin, OAuthService
+
 '''
 
 #
@@ -31,11 +34,15 @@ CONTROLLER_TEMPLATE_BODY='''
     def setProtocolHandler(self, protocolHandler):
         self.protocolHandler = protocolHandler
 
+    def initOAuth(self):
+        if protocolHandler and protocolHandler.plugin and protocolHandler.plugin.meta and protocolHandler.plugin.meta.getEnableOAUTH2():
+            self.oauthService = OAuthService(self.polyglot)
+
     def parameter_handler(self, params):
         self.Parameters.load(params)
         return self.protocolHandler.processParams(self.Parameters)
 
-    def config(self, param):
+    def configHandler(self, param):
         try:
             if os.path.exists(DATA_PATH):
                 self.protocolHandler.filesUploaded(DATA_PATH)
@@ -83,7 +90,6 @@ CONTROLLER_TEMPLATE_BODY='''
             if not self.__addNode(node):
                 return
         LOGGER.info(f'Done adding nodes ...')
-        self.valid_configuration = True
 
     def __addNode(self, node_info) ->bool:
         if node_info is None:
@@ -108,6 +114,58 @@ CONTROLLER_TEMPLATE_BODY='''
             LOGGER.error(str(ex))
             return False
 
+    def addNodeDoneHandler(self, node):
+        try:
+            return self.protocolHandler.addNodeDone(node)
+
+        except ValueError as err:
+            LOGGER.error(str(x))
+            return False
+
+    def configDoneHandler(self):
+        if not self.oauthService:
+            return 
+        # First check if user has authenticated
+        try:
+            self.oauthService.getAccessToken()
+            # If getAccessToken did raise an exception, then proceed with device discovery
+            return self.protocolHandler.configDone()
+
+        except ValueError as err:
+            LOGGER.warning('Access token is not yet available. Please authenticate.')
+            polyglot.Notices['auth'] = 'Please initiate authentication using the Authenticate Buttion'
+            return False
+
+    def customNSHandler(self, key, data):
+        if not self.oauthService:
+            return 
+        # This provides the oAuth config (key='oauth') and saved oAuth tokens (key='oauthTokens))
+        try:
+            self.oauthService.customNsHandler(key, data)
+        except Exception as ex:
+            LOGGER.error(ex)
+
+    def oauthHandler(self, token):
+        if not self.oauthService:
+            return 
+        # This provides the oAuth config (key='oauth') and saved oAuth tokens (key='oauthTokens))
+        try:
+            self.oauthService.oauthHandler(token)
+        except Exception as ex:
+            LOGGER.error(ex)
+
+    def callOAuthApi(self, method='GET', url=None, params=None, body=None)->bool:
+        if not self.oauthService:
+            return False
+
+        return self.oauthService(method, url, params, body)
+
+    def customDataHandler(self, data):
+        try:
+            self.protocolHandler.customData(data)
+        except Exception as ex:
+            LOGGER.error(ex)
+    
     def updateStatus(self, value, force: bool):
         return self.setDriver("ST", value, 2, force)
 

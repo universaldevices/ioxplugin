@@ -1,4 +1,4 @@
-CONTROLLER_TEMPLATE_HEADER='''
+
 import udi_interface, os, shutil, sys, json, time, threading
 from udi_interface import OAuth
 LOGGER = udi_interface.LOGGER
@@ -6,9 +6,33 @@ Custom = udi_interface.Custom
 from ioxplugin import Plugin, OAuthService
 
 DATA_PATH='./data'
-'''
+from ModbusDeviceNode import ModbusDeviceNode
+class ModbusControllerNode(udi_interface.Node):
+    id = 'modbuscontroll'
+    """This is a list of properties that were defined in the nodedef"""
+    drivers = [{'driver': 'ST', 'value': 0, 'uom': 2, 'name': 'Status'}]
+    children = [{'node_class': 'ModbusDeviceNode', 'id': 'modbus', 'name':
+        'ModbusDevice', 'parent': 'modbuscontroll'}]
 
-CONTROLLER_TEMPLATE_BODY='''
+    def __init__(self, polyglot, protocolHandler, controller=
+        'modbuscontroll', address='modbuscontroll', name='Modbus Controller'):
+        super().__init__(polyglot, controller, address, name)
+        self.protocolHandler = protocolHandler
+        self.Parameters = Custom(polyglot, 'customparams')
+        self.oauthService = None
+        self.poly.subscribe(polyglot.START, self.start)
+        self.poly.subscribe(polyglot.CUSTOMPARAMS, self.parameterHandler)
+        self.poly.subscribe(polyglot.POLL, self.poll)
+        self.poly.subscribe(polyglot.STOP, self.stop)
+        self.poly.subscribe(polyglot.CONFIG, self.configHandler)
+        self.poly.subscribe(polyglot.CONFIGDONE, self.configDoneHandler)
+        self.poly.subscribe(polyglot.ADDNODEDONE, self.addNodeDoneHandler)
+        self.poly.subscribe(polyglot.CUSTOMNS, self.customNSHandler)
+        self.poly.subscribe(polyglot.OAUTH, self.oauthHandler)
+        self.poly.subscribe(polyglot.CUSTOMDATA, self.customDataHandler)
+        self.configDone = threading.Condition()
+        self.initOAuth()
+
 
      def setProtocolHandler(self, protocolHandler):
         self.protocolHandler = protocolHandler
@@ -193,4 +217,3 @@ CONTROLLER_TEMPLATE_BODY='''
     ###
     commands = {'discover': Discover, 'query': Query}
 
-'''

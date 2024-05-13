@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='ioxplugin',
-    version='1.0.7',
+    version='1.0.8',
     packages=find_packages(),
     description='IoX Plugin Helper Package',
     long_description=open('README.md').read(),

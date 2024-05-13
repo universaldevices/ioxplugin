@@ -1,0 +1,19 @@
+<editors><editor id="support_voltage">
+<range uom="72" min="42" max="70"/>
+</editor>
+<editor id="dc_voltage">
+<range uom="72" min="36" max="70"/>
+</editor>
+<editor id="sell_amps">
+<range uom="1" min="0" max="27"/>
+</editor>
+<editor id="load_shave_amps">
+<range uom="1" min="0" max="48"/>
+</editor>
+<editor id="load_shave">
+<range uom="25" min="0" max="1" nls="NLSIX_load_shave"/>
+</editor>
+<editor id="CTL_BOOL">
+<range uom="2" min="0" max="1"/>
+</editor>
+</editors>

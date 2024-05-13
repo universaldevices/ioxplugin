@@ -10,7 +10,7 @@ DATA_PATH='./data'
 
 CONTROLLER_TEMPLATE_BODY='''
 
-     def setProtocolHandler(self, protocolHandler):
+    def setProtocolHandler(self, protocolHandler):
         self.protocolHandler = protocolHandler
 
     def initOAuth(self):

@@ -16,7 +16,9 @@
           "enableOAUTH2":false,
           "worksOnPolisy":true,
           "worksOnEisy":true,
-          "requiresIoXAccess": false
+          "requiresIoXAccess": false,
+          "requirements": ["pymodbus"],
+          "version": "1.0.1"
     },
     "editors": [
         {

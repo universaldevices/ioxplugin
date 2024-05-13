@@ -6,7 +6,7 @@ Copyright (C) 2024 Universal Devices
 """
 
 #import fastjsonschema
-import json
+import json,os
 from .nodedef import NodeDefs
 from .editor import Editors
 from .plugin_meta import PluginMetaData
@@ -34,8 +34,9 @@ UOM_SCHEMA="schemas/uom.schema.json"
 
 class Plugin:
 
-    def __init__(self, plugin_file, path:str, schema=PLUGIN_SCHEMA_FILE):
-        init_ext_logging(path)
+    def __init__(self, plugin_file, path:str=None, schema=PLUGIN_SCHEMA_FILE):
+        self.path = os.path.dirname(plugin_file) if path == None else path
+        init_ext_logging(self.path)
         self.meta = None
         self.editors=Editors()
         self.nodedefs:NodeDefs = None
@@ -45,7 +46,8 @@ class Plugin:
         if plugin_file == None:
             LOGGER.critical("plugin file does not exist ... ")
             return
-        self.profileWriter=ProfileWriter(True, path)
+
+        self.profileWriter=ProfileWriter(True, self.path)
 
         try:
             self.isValid=self.validate_json(schema, plugin_file)
@@ -168,10 +170,14 @@ class Plugin:
 
             main = PluginMain(path, self.meta, self.nodedefs)
             main.create()
+            main.generateRequirements()
+            main.generateVersion()
 
             #now generate the proto handler/impl
             node_impl_gen=IoXNodeImplGen(path, self.getPythonPHFileName(), self.getPythonPHClassName())
             node_impl_gen.create()
+
+
 
         except Exception as ex:
             LOGGER.critical(str(ex))

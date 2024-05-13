@@ -8,6 +8,8 @@ Copyright (C) 2024 Universal Devices
 from .log import LOGGER
 import os
 
+DEFAULT_REQ_PKGS=["udi_interface>=3.0.57", "ioxplugin"]
+
 class PluginMetaData:
 
     def __init__(self, metadata):
@@ -137,11 +139,19 @@ class PluginMetaData:
             return None
 
     def getRequirements(self):
+        out = DEFAULT_REQ_PKGS
         try:
-            return self.metadata['requirements']
+            return out + self.metadata['requirements']
         except Exception as ex:
-            LOGGER.critical(str(ex))
-            return None
+            LOGGER.warn(str(ex))
+            return out
+
+    def getVersion(self):
+        try:
+            return f"ud_plugin_version=\"{self.metadata['version']}\""
+        except Exception as ex:
+            LOGGER.warn(str(ex))
+            return "ud_plugin_version=\"1.0.0\""
 
     def getPythonPHClassName(self):
         name= f'{self.getName()}ProtocolHandler'.replace(' ','').replace('_','')

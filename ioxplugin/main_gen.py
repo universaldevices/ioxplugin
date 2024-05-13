@@ -90,3 +90,16 @@ class PluginMain:
             #file_path=f'{self.path}/{ndef.getPythonFileName()}'
             ngen = IoXNodeGen(ndef, self.path)
             nc = ngen.create(children)
+    
+    def generateVersion(self):
+        versionFile = os.path.join(self.path, "version.py")
+        with open(versionFile, 'w') as file:
+            file.write(self.plugin_info.getVersion())
+
+    def generateRequirements(self):
+        requirementsFile = os.path.join(self.path, "requirements.txt")
+        with open(requirementsFile, 'w') as file:
+            reqs = self.plugin_info.getRequirements()
+            for req in reqs:
+                file.write(req)
+                file.write('\n')

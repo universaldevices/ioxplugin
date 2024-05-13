@@ -5,6 +5,7 @@ from .plugin_meta import PluginMetaData
 from .log import LOGGER
 from ioxplugin import ast_util
 from .iox_node_gen import IoXNodeGen
+from .iox_main_template import IOX_MAIN_TEMPLATE
 import os
 
 
@@ -23,31 +24,6 @@ class PluginMain:
 
         file_path = f'{self.path}/{exec_name}'
         create_main = not os.path.exists(file_path)
-        if create_main:
-            #do not recreate the main
-            with open(file_path, 'w') as file:
-                imports = ast_util.astCreateImports()
-                python_code = astor.to_source(imports)
-                file.write(python_code)
-                
-                version_import = ast_util.astCreateImport("version")
-                python_code = astor.to_source(version_import)
-                file.write(python_code)
-
-                #ioxplugin_import = ast_util.astCreateImport("ioxplugin")
-                #ioxplugin_code = astor.to_source(ioxplugin_import)
-                #file.write(ioxplugin_code)
-
-                ioxplugin_from_import = ast_util.astCreateImportFrom("ioxplugin","Plugin")
-                ioxplugin_code = astor.to_source(ioxplugin_from_import)
-                file.write(ioxplugin_code)
-
-                imp_from_import = ast_util.astCreateImportFrom(self.plugin_info.getPythonPHClassName(), 
-                        self.plugin_info.getPythonPHClassName())
-                ioxplugin_code = astor.to_source(imp_from_import)
-                file.write(ioxplugin_code)
-                file.write(f"\nPLUGIN_FILE_NAME = \'{self.plugin_info.plugin_file}\'\n")
-
 
         self.controllerNode = None
         children = []
@@ -68,26 +44,22 @@ class PluginMain:
                 )
 
         if create_main:
-            with open(file_path, 'a') as file:
-                import_stmt = ast_util.astCreateImportFrom(nd.getPythonClassName(), nd.getPythonClassName())
-                python_code = astor.to_source(import_stmt)
-                file.write(python_code)
-
-                global_defs = ast_util.astCreateGlobals(True)
-                for global_def in global_defs:
-                    python_code = astor.to_source(global_def)
-                    file.write(python_code)
-
-                main_body = ast_util.astCreateMainFunc(self.controllerNode.getPythonClassName(), self.plugin_info.getPythonPHClassName()) 
-                python_code = astor.to_source(main_body)
-                file.write(python_code)
-
+            #do not recreate the main
+            with open(file_path, 'w') as file:
+                code = IOX_MAIN_TEMPLATE\
+                .replace('__PROTOCOL_HANDLER_FILE__',self.plugin_info.getPythonPHClassName())\
+                .replace('__PROTOCOL_HANDLER_CLASS__',self.plugin_info.getPythonPHClassName())\
+                .replace('__PLUGIN_FILE_NAME__', self.plugin_info.plugin_file)\
+                .replace('__CONTROLLER_NODE_FILE__',nd.getPythonClassName())\
+                .replace('__CONTROLLER_NODE_CLASS__',nd.getPythonClassName())
+                file.write(code)
+                
+                
         for child in children:
             child['parent'] = self.controllerNode.id
 
         for ndi in nodedefs:
             ndef = nodedefs[ndi]
-            #file_path=f'{self.path}/{ndef.getPythonFileName()}'
             ngen = IoXNodeGen(ndef, self.path)
             nc = ngen.create(children)
     

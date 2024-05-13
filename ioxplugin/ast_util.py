@@ -300,7 +300,7 @@ def astInitBodyController():
         )),
         ast.Expr(value=ast.Call(
             func=ast.Attribute(value=ast.Attribute(value=ast.Name(id='self', ctx=ast.Load()), attr='poly', ctx=ast.Load()), attr='subscribe', ctx=ast.Load()),
-            args=[ast.Attribute(value=ast.Name(id='polyglot', ctx=ast.Load()), attr='CUSTOMPARAMS', ctx=ast.Load()), ast.Attribute(value=ast.Name(id='self', ctx=ast.Load()), attr='parameter_handler', ctx=ast.Load())],
+            args=[ast.Attribute(value=ast.Name(id='polyglot', ctx=ast.Load()), attr='CUSTOMPARAMS', ctx=ast.Load()), ast.Attribute(value=ast.Name(id='self', ctx=ast.Load()), attr='parameterHandler', ctx=ast.Load())],
             keywords=[]
         )),
         ast.Expr(value=ast.Call(
@@ -436,102 +436,6 @@ def astAddClassInit(is_controller, defaults_array, impl_class_name):
     )
 
     return function_def
-
-def astControllerBody(): 
-    # Create an AST node for the assignment to self.Parameters
-    assignment = ast.Assign(
-        targets=[ast.Attribute(value=ast.Name(id='self', ctx=ast.Load()), attr='Parameters', ctx=ast.Store())],
-        value=ast.Call(
-            func=ast.Name(id='Custom', ctx=ast.Load()),
-            args=[
-                ast.Name(id='polyglot', ctx=ast.Load()),
-                ast.Str(s='customparams')
-            ],
-            keywords=[]
-        )
-    )
-    
-    valid_config = ast.Assign(
-                targets=[ast.Attribute(value=ast.Name(id='self', ctx=ast.Load()), attr='valid_configuration', ctx=ast.Store())],
-                value=ast.Constant(value=False)
-    )
-
-    # Create a list to store method calls
-    method_calls = []
-
-    # Subscribing to various events
-    events = ['START', 'CUSTOMPARAMS', 'POLL', 'STOP', 'CONFIG']
-    methods = ['start', 'parameter_handler', 'poll', 'stop', 'config']
-    for event, method in zip(events, methods):
-        subscribe_call = ast.Expr(value=ast.Call(
-            func=ast.Attribute(value=ast.Name(id='self', ctx=ast.Load()), attr='poly', ctx=ast.Load()),
-            args=[
-                ast.Attribute(value=ast.Name(id='polyglot', ctx=ast.Load()), attr=event, ctx=ast.Load()),
-                ast.Attribute(value=ast.Name(id='self', ctx=ast.Load()), attr=method, ctx=ast.Load())
-            ],
-            keywords=[]
-        ))
-        method_calls.append(subscribe_call)
-
-    # Adding self.poly.ready() and self.addAllNodes() calls
-    ready_call = ast.Expr(value=ast.Call(
-        func=ast.Attribute(value=ast.Name(id='self', ctx=ast.Load()), attr='poly.ready', ctx=ast.Load()),
-        args=[],
-        keywords=[]
-    ))
-    method_calls.append(ready_call)
-
-    add_all_nodes_call = ast.Expr(value=ast.Call(
-        func=ast.Attribute(value=ast.Name(id='self', ctx=ast.Load()), attr='addAllNodes', ctx=ast.Load()),
-        args=[],
-        keywords=[]
-    ))
-    method_calls.append(add_all_nodes_call)
-
-    return [assignment, valid_config] + method_calls
-
-def astParamHandlerFunc():
-    # Create AST nodes for each statement in the function body
-    clear_notices = ast.Expr(value=ast.Call(
-    func=ast.Attribute(
-            value=ast.Attribute(value=ast.Name(id='self', ctx=ast.Load()), attr='poly', ctx=ast.Load()),
-            attr='Notices.clear',
-            ctx=ast.Load()
-    ),
-    args=[],
-    keywords=[]
-    ))
-
-    load_parameters = ast.Expr(value=ast.Call(
-    func=ast.Attribute(
-            value=ast.Attribute(value=ast.Name(id='self', ctx=ast.Load()), attr='Parameters', ctx=ast.Load()),
-            attr='load',
-            ctx=ast.Load()
-    ),
-    args=[ast.Name(id='params', ctx=ast.Load())],
-    keywords=[]
-    ))
-
-    return_true = ast.Return(value=ast.Constant(value=True))
-
-    # Function definition
-    function_def = ast.FunctionDef(
-    name='parameter_handler',
-    args=ast.arguments(
-            posonlyargs=[],
-            args=[ast.arg(arg='self'), ast.arg(arg='params')],
-            kwonlyargs=[],
-            kw_defaults=[],
-            defaults=[]
-    ),
-    body=[clear_notices, load_parameters, return_true],
-    decorator_list=[],
-    returns=None
-    )
- 
-    return function_def
-
-import ast
 
 def astStartFunc():
     log_info = astLogger('info', 'Starting ... ', False)

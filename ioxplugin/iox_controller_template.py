@@ -1,5 +1,5 @@
 CONTROLLER_TEMPLATE_HEADER='''
-import udi_interface, os, sys, json, time
+import udi_interface, os, shutil, sys, json, time
 from udi_interface import OAuth
 LOGGER = udi_interface.LOGGER
 Custom = udi_interface.Custom
@@ -39,7 +39,7 @@ CONTROLLER_TEMPLATE_BODY='''
         if self.protocolHandler and self.protocolHandler.plugin and self.protocolHandler.plugin.meta and self.protocolHandler.plugin.meta.getEnableOAUTH2():
             self.oauthService = OAuthService(self.polyglot)
 
-    def parameter_handler(self, params):
+    def parameterHandler(self, params):
         self.Parameters.load(params)
         return self.protocolHandler.processParams(self.Parameters)
 

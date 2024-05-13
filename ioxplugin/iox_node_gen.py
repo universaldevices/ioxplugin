@@ -146,7 +146,6 @@ class IoXNodeGen():
             pass
             #set protocol handler
             #class_def.body.append(ast_util.astSetPluginFunc())
-            #class_def.body.append(ast_util.astParamHandlerFunc())
             #class_def.body.append(ast_util.astConfigFunc())
             #class_def.body.append(ast_util.astStartFunc())
             #class_def.body.append(ast_util.astStopFunc())

@@ -5,6 +5,7 @@ LOGGER = udi_interface.LOGGER
 Custom = udi_interface.Custom
 from ioxplugin import Plugin, OAuthService
 
+DATA_PATH='./data'
 '''
 
 #
@@ -35,7 +36,7 @@ CONTROLLER_TEMPLATE_BODY='''
         self.protocolHandler = protocolHandler
 
     def initOAuth(self):
-        if protocolHandler and protocolHandler.plugin and protocolHandler.plugin.meta and protocolHandler.plugin.meta.getEnableOAUTH2():
+        if self.protocolHandler and self.protocolHandler.plugin and self.protocolHandler.plugin.meta and self.protocolHandler.plugin.meta.getEnableOAUTH2():
             self.oauthService = OAuthService(self.polyglot)
 
     def parameter_handler(self, params):
@@ -60,7 +61,7 @@ CONTROLLER_TEMPLATE_BODY='''
         self.addAllNodes()
         self.poly.updateProfile()
         self.poly.setCustomParamsDoc()
-        self.updateStatus(1 if self.protocolHandler.start() else 0)
+        self.updateStatus(1 if self.protocolHandler.start() else 0, True)
         self.poly.ready()
         return True
 

@@ -18,7 +18,7 @@ if __name__ == '__main__':
         polyglot.start(version.ud_plugin_version)
         plugin = None
         if not os.path.exists(PLUGIN_FILE_NAME):
-            polyglot.Notices[config]=f"{PLUGIN_FILE_NAME} does not exist. Uplaod it using file upload ..."
+            polyglot.Notices['config']=f"{PLUGIN_FILE_NAME} does not exist. Uplaod it using file upload ..."
         else:
             plugin = Plugin(PLUGIN_FILE_NAME)
             plugin.toIoX()
@@ -26,6 +26,7 @@ if __name__ == '__main__':
         
         protocolHandler = __PROTOCOL_HANDLER_CLASS__(plugin)
         controller = __CONTROLLER_NODE_CLASS__(polyglot, protocolHandler)
+        protocolHandler.setController(controller)
         controller.start()
         polyglot.runForever()
     except (KeyboardInterrupt, SystemExit):

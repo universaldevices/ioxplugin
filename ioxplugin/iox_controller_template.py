@@ -17,7 +17,7 @@ CONTROLLER_TEMPLATE_BODY='''
         if self.protocolHandler and self.protocolHandler.plugin and self.protocolHandler.plugin.meta and self.protocolHandler.plugin.meta.getEnableOAUTH2():
             self.oauthService = OAuthService(self.polyglot)
 
-    def parameter_handler(self, params):
+    def parameterHandler(self, params):
         self.Parameters.load(params)
         return self.protocolHandler.processParams(self.Parameters)
 

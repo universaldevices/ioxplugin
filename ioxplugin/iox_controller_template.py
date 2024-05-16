@@ -26,11 +26,11 @@ CONTROLLER_TEMPLATE_BODY='''
             if os.path.exists(DATA_PATH):
                 self.protocolHandler.filesUploaded(DATA_PATH)
                 shutil.rmtree(DATA_PATH)
-                return
+            if param:
+                return self.protocolHandler.configChanged(param)
         except Exception as ex:
             LOGGER.warn(str(ex))
 
-        self.protocolHandler.configChanged(param)
         return True
 
     def start(self):

@@ -38,7 +38,7 @@ class __PROTOCOL_HANDLER_CLASS__:
         try:
             return True
         except Exception as ex:
-            LOGGER.error(f'setProperty failed .... ')
+            LOGGER.error(f'setProperty {property_id} failed .... ')
             return False
     
     ####
@@ -49,7 +49,7 @@ class __PROTOCOL_HANDLER_CLASS__:
         try:
             return True
         except Exception as ex:
-            LOGGER.error(f'queryProperty failed .... ')
+            LOGGER.error(f'queryProperty {property_id} failed .... ')
             return False
 
     ####
@@ -59,7 +59,7 @@ class __PROTOCOL_HANDLER_CLASS__:
     def processCommand(self, node, command_name, **kwargs):
         try:
             for key, value in kwargs.items():
-                print(f"{key}: {value}")
+                LOGGER.info(f"command {command_name} | param: {key}: {value}")
             return True
         except Exception as ex:
             LOGGER.error(str(ex))
@@ -127,16 +127,16 @@ class __PROTOCOL_HANDLER_CLASS__:
             return False
 
     ####
-    # This method is called with the configuration parameters have changed. The parameter is a dictionary of key/value
-    # pairs
+    #This method is called upon start and gives you all the configuration parameters
+    #used to initialize this plugin including the store, version, etc.
     ####
-    def configChanged(self, param)->bool:
+    def processConfig(self, config):
         try:
             return True
         except Exception as ex:
             LOGGER.error(str(ex))
             return False
-
+    
     ####
     # This method is called with the configuration is done. This is rarely used as its main function is to facilitate 
     ####
@@ -242,6 +242,26 @@ class __PROTOCOL_HANDLER_CLASS__:
     ###
     def getNode(self, address:str):
         return self.controller.poly.getNode()
+
+    ###
+    # Call this method to update a property for a node.
+    # The plugin already creates an implementation for you such that you can 
+    # call something like updateHeatSetpoint(). This said, however, for dynamically
+    # generated code/classes, you might not actually know the method naems. In those
+    # cases, you can use this method instead.
+    # You can use the text just as an arbitrary/freeform text that is displayed as is
+    # in the clients without any processing.
+    ###
+    def setProperty(node_addr:str, property_id:str, value, force:bool, text:str=None):
+        try:
+            node = self.getNode(node_addr)
+            if node == None:
+                LOGGER.error(f"Set property failed for {node_address}")
+                return False
+             return node.setDriver(property_id, value, force=force, text=text)
+        except Exception as ex:
+            LOGGER.error(str(ex))
+            return False
 
     ###
     # If your plugin is an OAuth client, use this method to call APIs that 

@@ -11,6 +11,7 @@ class IoXTCPTransport():
     def __init__(self, comm_params):
         if comm_params == None:
             raise Exception ("Need communication parameters for TCP (host/port)")
+        self.name = "TCP"
         self.host = None
         self.port = None
         self.timeout = None
@@ -40,6 +41,7 @@ class IoXSerialTransport():
         if comm_params == None:
             raise Exception ("Need communication parameters for serial (port/baudrate)")
 
+        self.name = "Serial"
         self.port = None
         self.baudrate = 115200
         self.timeout=1
@@ -76,14 +78,14 @@ class IoXSerialTransport():
 
 class IoXTransport:
     def __init__(self, transport_params):
-        if comm_params == None:
+        if transport_params == None:
             raise Exception ("Need communication parameters for TCP (host/port)")
 
         if not transport_params['mode']:
             raise Exception ("Missing communication mode")
 
         self.is_connected=False
-        self.params=transport.params
+        self.params=transport_params
         self.mode=self.params['mode']
 
     def getMode(self):

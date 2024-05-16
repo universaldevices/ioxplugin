@@ -93,6 +93,9 @@ class NodeProperties:
         except Exception as ex:
             LOGGER.critical(str(ex))
 
+    '''
+        Returns a dictory of the form {property_id, protocol_data_object}
+    '''
     def getProtocolData(self):
         out = {}
         for np in self.node_properties:

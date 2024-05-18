@@ -148,11 +148,11 @@ class NodeDefs:
                 "accepts": [
                     {
                         "id": "discover",
-                        "name": "Discover"
+                        "name": "discover"
                     },
                     {
                         "id": "query",
-                        "name": "Query"
+                        "name": "query"
                     }
                 ],
                 "sends": []

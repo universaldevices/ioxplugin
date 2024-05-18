@@ -77,6 +77,9 @@ class CommandDetails:
                     p = CommandParam(param)
                     self.params[p.id]=p
 
+            if self.id.lower() == "query":
+                self.id = "x_query"
+
         except Exception as ex:
             LOGGER.critical(str(ex))
             raise

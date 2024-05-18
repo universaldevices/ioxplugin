@@ -31,6 +31,7 @@ class __PROTOCOL_HANDLER_CLASS__:
     ####
 
     ####
+    # MANDATORY
     # This method is called by IoX to set a property
     # in the node/device or service
     ####
@@ -42,8 +43,10 @@ class __PROTOCOL_HANDLER_CLASS__:
             return False
     
     ####
+    # MANDATORY
     # This method is called by IoX to query a property
-    # in the node/device or service
+    # in the node/device or service. Return the actual 
+    # value
     ####
     def queryProperty(self, node, property_id):
         try:
@@ -53,19 +56,23 @@ class __PROTOCOL_HANDLER_CLASS__:
             return False
 
     ####
+    # MANDATORY if and only if you have commands
     # This method is called by IoX to send a command 
     # to the node/device or service
     ####
     def processCommand(self, node, command_name, **kwargs):
         try:
-            for key, value in kwargs.items():
-                LOGGER.info(f"command {command_name} | param: {key}: {value}")
+            LOGGER.info(f"Processing command {command_name}") 
+            if kwargs != None:
+                for key, value in kwargs.items():
+                    LOGGER.info(f"-param: {key}: {value}")
             return True
         except Exception as ex:
             LOGGER.error(str(ex))
             return False
 
     ####
+    # MANDATORY if and only if you have commands
     # This method is called at start so that you can do whatever initialization
     # you need. If you return false, the status of the controller node shows 
     # disconnected. So, make sure you return the correct status.
@@ -75,6 +82,19 @@ class __PROTOCOL_HANDLER_CLASS__:
             return True
         except Exception as ex:
             LOGGER.error(f'start failed .... ')
+            LOGGER.error(str(ex))
+            return False
+
+    ####
+    # MANDATORY 
+    # This method is called in order to get a unique address for your newly created node
+    # for the given nodedef_id
+    ####
+    def getNodeAddress(self, nodedef_id):
+        try:
+            #do any mapping you wish. 
+            return nodedef_id
+        except Exception as ex:
             LOGGER.error(str(ex))
             return False
 
@@ -91,6 +111,7 @@ class __PROTOCOL_HANDLER_CLASS__:
             return False
 
 
+    ####
     # This method is called by IoX to discover  
     # nodes/devices or service
     ####
@@ -107,7 +128,7 @@ class __PROTOCOL_HANDLER_CLASS__:
     ####
 
     ####
-    # This method is called when a new node as been added to the system
+    # This method is called when a new node as been added to the system.
     ####
     def nodeAdded(self, node):
         try:

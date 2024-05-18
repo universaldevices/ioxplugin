@@ -994,7 +994,7 @@ def astQueryAllMethod(commands):
 
     function_def = ast.FunctionDef(
         name='queryAll',
-        args=ast.arguments(args=[], vararg=None, kwonlyargs=[], kw_defaults=[], kwarg=None, defaults=[]),
+        args=ast.arguments(args=[ ast.arg(arg='self', annotation=None)], vararg=None, kwonlyargs=[], kw_defaults=[], kwarg=None, defaults=[]),
         body=[],
         decorator_list=[],
         returns=None
@@ -1137,119 +1137,6 @@ def astCreateMainFunc(controller, protocolHandler):
     )
 
     return main_if
-
-def astDiscoverControllerCommand():
-    return_statement = ast.Return(
-        value = ast.Call(
-        func=ast.Attribute(
-            value=ast.Attribute(
-                value=ast.Name(id='self', ctx=ast.Load()),
-                attr='protocolHandler',
-                ctx=ast.Load()
-            ),
-            attr='discover',
-            ctx=ast.Load()
-        ),
-        args=[],
-        keywords=[]
-    )
-    )
-    body=[
-       return_statement 
-    ]
-    return body
-
-def astQueryAllControllerCommand():
-    body=[
-        # nodes = self.poly.getNodes()
-        ast.Assign(
-            targets=[ast.Name(id='nodes', ctx=ast.Store())],
-            value=ast.Call(
-                func=ast.Attribute(
-                    value=ast.Attribute(
-                        value=ast.Name(id='self', ctx=ast.Load()),
-                        attr='poly',
-                        ctx=ast.Load()
-                    ),
-                    attr='getNodes',
-                    ctx=ast.Load()
-                ),
-                args=[],
-                keywords=[]
-            )
-        ),
-        # if nodes == None or len(nodes) == 0:
-        ast.If(
-            test=ast.BoolOp(
-                op=ast.Or(),
-                values=[
-                    ast.Compare(
-                        left=ast.Name(id='nodes', ctx=ast.Load()),
-                        ops=[ast.Is()],
-                        comparators=[ast.Constant(value=None)]
-                    ),
-                    ast.Compare(
-                        left=ast.Call(
-                            func=ast.Name(id='len', ctx=ast.Load()),
-                            args=[ast.Name(id='nodes', ctx=ast.Load())],
-                            keywords=[]
-                        ),
-                        ops=[ast.Eq()],
-                        comparators=[ast.Constant(value=0)]
-                    )
-                ]
-            ),
-            body=[
-                # return True
-                ast.Return(value=ast.Constant(value=True))
-            ],
-            orelse=[]
-        ),
-        # for n in nodes:
-        ast.For(
-            target=ast.Name(id='n', ctx=ast.Store()),
-            iter=ast.Name(id='nodes', ctx=ast.Load()),
-            body=[
-                # node = nodes[n]
-                ast.Assign(
-                    targets=[ast.Name(id='node', ctx=ast.Store())],
-                    value=ast.Subscript(
-                        value=ast.Name(id='nodes', ctx=ast.Load()),
-                        slice=ast.Name(id='n', ctx=ast.Load()),
-                        ctx=ast.Load()
-                    )
-                ),
-                # if node == None:
-                ast.If(
-                    test=ast.Compare(
-                        left=ast.Name(id='node', ctx=ast.Load()),
-                        ops=[ast.Is()],
-                        comparators=[ast.Constant(value=None)]
-                    ),
-                    body=[
-                        # continue
-                        ast.Continue()
-                    ],
-                    orelse=[
-                        # node.queryAll()
-                        ast.Expr(
-                            value=ast.Call(
-                                func=ast.Attribute(
-                                    value=ast.Name(id='node', ctx=ast.Load()),
-                                    attr='queryAll',
-                                    ctx=ast.Load()
-                                ),
-                                args=[],
-                                keywords=[]
-                            )
-                        )
-                    ]
-                )
-            ],
-            orelse=[]
-        )
-    ]
-    return body
 
 def astSetPluginFunc():
     return ast.FunctionDef(
@@ -1406,7 +1293,7 @@ def astPHSetPropertyFunc(update_method, property):
 
 def astPHProcessCommandFunc(command_name, args):
 
-    arg_nodes = [ast.Constant(value=command_name)] 
+    arg_nodes = [ast.Name(id='self', ctx=ast.Load()),ast.Constant(value=command_name) ] 
     #for arg in args_array:
     #    arg_nodes.append(ast.Name(id=arg, ctx=ast.Load))
     # Create AST node for function call

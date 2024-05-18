@@ -78,22 +78,37 @@ CONTROLLER_TEMPLATE_BODY='''
             config = {}
             config['nodes'] = []
             for child in self.children:
-                config['nodes'].append({'nodeDefId': child['id'], 'address':
-                    child['node_class'], 'name': child['name'],
+                try:
+                    config['nodes'].append({'nodeDefId': child['id'], 'address':
+                    child['id'], 'name': child['name'],
                     'primaryNode': child['parent']})
+                except Exception as ex:
+                    LOGGER.error(str(ex))
+                    return
         for node in config['nodes']:
+            if node['nodeDefId'] == self.id:
+                continue
             if not self.__addNode(node):
                 return
         LOGGER.info(f'Done adding nodes ...')
+
+    def __getNodeClass(self, nodeDefId:str)->str:
+        for child in self.children:
+            if child['id'] == nodeDefId:
+                return child['node_class']
+        return None
 
     def __addNode(self, node_info) ->bool:
         if node_info is None:
             LOGGER.error('node cannot be null')
             return False
         try:
-            cls = globals()[node_info['address']]
-            node = cls(self.poly, node_info['primaryNode'], node_info[
-                'nodeDefId'], node_info['name'])
+            node_class = self.__getNodeClass(node_info['nodeDefId'])
+            if node_class == None:
+                return False 
+            node_address=self.protocolHandler.getNodeAddress(node_info['nodeDefId'])
+            cls = globals()[node_class]
+            node = cls(self.poly, self.protocolHandler, node_info['primaryNode'], node_address, node_info['name'])
             if node is None:
                 LOGGER.error(f'invalid noddef id ...')
                 return False
@@ -174,10 +189,10 @@ CONTROLLER_TEMPLATE_BODY='''
     def getStatus(self):
         return self.getDriver("ST")
 
-    def Discover(self, command):
+    def discover(self, command):
         return self.protocolHandler.discover()
 
-    def Query(self, command):
+    def query(self, command):
         nodes = self.poly.getNodes()
         if nodes is None or len(nodes) == 0:
             return True
@@ -186,11 +201,11 @@ CONTROLLER_TEMPLATE_BODY='''
             if node is None:
                 continue
             else:
-                node.queryAll()
+                node.query()
 
     ###
     # This is a list of commands that were defined in the nodedef
     ###
-    commands = {'discover': Discover, 'query': Query}
+    commands = {'Discover': discover, 'Query': query}
 
 '''

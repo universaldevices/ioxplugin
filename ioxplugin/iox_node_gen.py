@@ -21,15 +21,15 @@ class IoXNodeGen():
         if command == None:
             return None
         
-        if not command.hasParams():
-            if command_name == "Query" and command.id == "query":
-                return ast_util.astQueryAllControllerCommand()
-            if command_name == "Discover" and command.id == "discover":
-                return ast_util.astDiscoverControllerCommand()
+  #      if not command.hasParams() and self.nodedef.isController:
+  #          if command_name == "Query" and command.id == "query":
+  #              return ast_util.astQueryAllControllerCommand()
+  #          if command_name == "Discover" and command.id == "discover":
+  #              return ast_util.astDiscoverControllerCommand()
         
         out = []
         error = []
-        impl_args ={} 
+        impl_args ={}
 
         added_jparams=False
         is_property=command.init_prop != None
@@ -251,7 +251,6 @@ class IoXNodeGen():
 
         if len (query_commands) > 0 and not self.nodedef.isController:
             class_def.body.append(ast_util.astQueryAllMethod(query_commands)) 
-
 
         #now make the commands
         for command in commands:

@@ -10,7 +10,6 @@ from ioxplugin import Plugin
 from __PROTOCOL_HANDLER_FILE__ import __PROTOCOL_HANDLER_CLASS__
 
 PLUGIN_FILE_NAME = '__PLUGIN_FILE_NAME__'
-from __CONTROLLER_NODE_FILE__ import __CONTROLLER_NODE_CLASS__
 LOGGER = udi_interface.LOGGER
 if __name__ == '__main__':
     try:
@@ -24,6 +23,7 @@ if __name__ == '__main__':
             plugin.toIoX()
             plugin.generateCode(path='./')
         
+        from __CONTROLLER_NODE_FILE__ import __CONTROLLER_NODE_CLASS__
         protocolHandler = __PROTOCOL_HANDLER_CLASS__(plugin)
         controller = __CONTROLLER_NODE_CLASS__(polyglot, protocolHandler)
         protocolHandler.setController(controller)

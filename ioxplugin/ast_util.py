@@ -1203,7 +1203,10 @@ def astPHQueryPropertyFunc(update_method, property):
             ),
             # Inner if statement
             ast.If(
-                test=ast.Name(id='val', ctx=ast.Load()),
+                test=ast.Compare(
+                left=ast.Name(id='val', ctx=ast.Load()),
+                ops=[ast.NotEq()],
+                comparators=[ast.Constant(value=None)]),
                 body=[
                     # Method call within the inner if statement
                     ast.Expr(

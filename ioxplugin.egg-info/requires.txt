@@ -1,0 +1,2 @@
+udi_interface>=3.0.57
+astor

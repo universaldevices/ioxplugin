@@ -42,6 +42,9 @@ class NodeDefDetails:
             LOGGER.critical(str(ex))
             raise
 
+    def getPrecisions(self):
+        return self.properties.getPrecisions()
+
     def getPG3Commands(self):
         commands = []
 

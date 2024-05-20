@@ -104,6 +104,22 @@ class NodeProperties:
 
         return out
 
+    def getPrecisions(self):
+        precisions = {} 
+        for np in self.node_properties:
+            prop = self.node_properties[np]
+            if prop == None:
+                continue
+            editor = Editors.getEditors().editors[prop.editor.getEditorId()]
+            precision = 0
+            try:
+                precision = int(editor.precision)
+            except Exception as ex:
+                pass
+            precisions[prop.id] = precision
+        return precisions
+
+
     def getPG3Drivers(self):
         drivers = []
         for np in self.node_properties:

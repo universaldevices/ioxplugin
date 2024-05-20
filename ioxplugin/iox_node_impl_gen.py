@@ -22,6 +22,10 @@ class __PROTOCOL_HANDLER_CLASS__:
 
     def __init__(self, plugin):
         self.plugin = plugin
+        ### In case you want to have a mapping of nodes, you can use something like this
+        #self.nodes = {}
+        ### See nodeAdded and nodeRemoved
+        ###
 
     def setController(self, controller):
         self.controller = controller
@@ -132,6 +136,11 @@ class __PROTOCOL_HANDLER_CLASS__:
     ####
     def nodeAdded(self, node):
         try:
+            ###You can store your nodes in a dictionary for mapping or otherwise such as
+            #if node == None:
+            #   return False
+            #self.nodes[node.address] = node
+            ###
             return True
         except Exception as ex:
             LOGGER.error(str(ex))
@@ -142,6 +151,11 @@ class __PROTOCOL_HANDLER_CLASS__:
     ####
     def nodeRemoved(self, node)->bool:
         try:
+            ###if you stored your nodes a dictionary, delete them 
+            #if node == None:
+            #   return False
+            #del self.nodes[node.address]
+            ###
             return True
         except Exception as ex:
             LOGGER.error(str(ex))
@@ -196,6 +210,13 @@ class __PROTOCOL_HANDLER_CLASS__:
     ####
     def filesUploaded(self, path:str)->bool:
         try:
+            pass
+            ###copy files to your desired directory, something like this:
+            #file_path = os.path.join(path, filename)
+            #if os.path.isfile(file_path):
+            #    dest_path = os.path.join('./', filename)
+            #    shutil.copy(file_path, dest_path)
+            ###
             return True
         except Exception as ex:
             LOGGER.error(str(ex))
@@ -279,7 +300,7 @@ class __PROTOCOL_HANDLER_CLASS__:
             if node == None:
                 LOGGER.error(f"Set property failed for {node_address}")
                 return False
-             return node.setDriver(property_id, value, force=force, text=text)
+            return node.setDriver(property_id, value, force=force, text=text)
         except Exception as ex:
             LOGGER.error(str(ex))
             return False

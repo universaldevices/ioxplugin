@@ -62,7 +62,7 @@ CONTROLLER_TEMPLATE_BODY='''
     def stop(self):
         LOGGER.info(f'Stopping ... ')
         self.protocolHandler.stop()
-        self.updateStatus(0)
+        self.updateStatus(0,True)
         return True
 
     def poll(self, polltype):

@@ -14,10 +14,15 @@ class Protocol:
     def __init__(self, protocol):
         if not protocol['name']:
             raise Exception("A protocol needs name ...")
-        self.config = None
+        self.protocol = protocol
         self.name = protocol['name']
-        if 'config' in protocol:
-            self.config = protocol['config']
+
+    """
+        Returns the details of the protocol which might be 
+        different for each. This is a dictionary
+    """
+    def getDetails(self):
+        return self.protocol 
 
     def isModbus(self):
         return self.name == "Modbus"

@@ -1,0 +1,150 @@
+{
+    "plugin": {
+          "name":"modbus",
+          "description":"Modbus snippet",
+          "author":"UD",
+          "language": 0,
+          "executableName":"modbus.py",
+          "installScript":"install.sh",
+          "documentationLink":"docs",
+          "licenseLink":"lic",
+          "shortPoll":60,
+          "longPoll":600,
+          "profileVersion":"3.0.0",
+          "initialLogLevel":3,
+          "enableDiscovery":false,
+          "enableOAUTH2":false,
+          "worksOnPolisy":true,
+          "worksOnEisy":true,
+          "requiresIoXAccess": false,
+          "requirements": ["pymodbus"],
+          "version": "1.0.1"
+    },
+    "editors": [
+        {
+            "id": "support_voltage",
+            "min": 42,
+            "max": 70,
+            "uom": "Volt | 72",
+            "precision":3,
+            "step":1
+        },
+        {
+            "id": "dc_voltage",
+            "min": 36,
+            "max": 70,
+            "uom": "Volt | 72",
+            "precision":3,
+            "step":1
+
+        },
+        {
+            "id": "sell_amps",
+            "min": 0,
+            "max": 27,
+            "uom": "Ampere (amp) | 1",
+            "precision":3,
+            "step":1
+        },
+        {
+            "id": "load_shave_amps",
+            "min": 0,
+            "max": 48,
+            "uom": "Ampere (amp) | 1",
+            "precision":3,
+            "step":1
+        },
+        {
+            "id": "load_shave",
+            "min": 0,
+            "max": 1,
+            "uom": "Index | 25",
+            "index_names": [
+                "Eanbled|1",
+                "Disabled|0"
+            ]
+        }
+    ],
+    "protocol": {
+        "name": "Modbus",
+        "is_rtu": false
+    },
+    "nodedefs": [
+        {
+            "id":"modbus",
+            "name":"ModbusDevice",
+            "icon":"Electricity",
+            "properties": [
+                {
+                    "id": "LOAD_SHAVE",
+                    "name": "Load Shave",
+                    "editor": {
+                        "idref": "load_shave"
+                    } ,
+                    "protocol":{
+                        "register_address": "0x01b2",
+                        "register_data_type": "uint16",
+                        "register_type": "holding"
+                    },
+                    "is_settable": true
+                },
+                {
+                    "id":"GS_VOLTAGE",
+                    "name": "Grid Support Voltage",
+                    "editor": {
+                        "idref": "support_voltage"
+                    },
+                    "protocol":{
+                        "register_address": "0x0178", 
+                        "register_data_type": "uint32",
+                        "register_type": "holding"
+                    },
+                    "is_settable": true
+                },
+                {
+                    "id": "SELL_AMPS",
+                    "name": "Maximum Sell Amps",
+                    "editor": {
+                        "idref": "sell_amps"
+                    } ,
+                    "protocol":{
+                        "register_address": "0x01b4",
+                        "register_data_type": "uint32",
+                        "register_type": "holding"
+                    },
+                    "is_settable": true
+                },
+                {
+                    "id": "LOAD_SHAVE_AMPS",
+                    "name": "Load Shave Amps",
+                    "editor": {
+                        "idref": "load_shave_amps"
+                    } ,
+                    "protocol":{
+                        "register_address": "0x01b6",
+                        "register_data_type": "uint32",
+                        "register_type": "holding"
+                    },
+                    "is_settable": true
+                },
+                {
+                    "id": "DC_VOLTAGE",
+                    "name": "DC Voltage ",
+                    "editor": {
+                        "idref": "dc_voltage"
+                    } ,
+                    "protocol":{
+                        "register_address": "0x0050",
+                        "register_data_type": "uint32",
+                        "register_type": "holding"
+                    },
+                    "is_settable": false
+                }
+            ],
+            "commands": {
+                "accepts": [],
+                "sends": []
+            } 
+        }
+    ]
+}

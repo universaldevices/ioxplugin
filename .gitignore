@@ -13,3 +13,5 @@ tests/__pycache__/*
 *.log
 .vscode/
 .vscode/*
+ioxplugin.egg-info/
+ioxplugin.egg-info/*

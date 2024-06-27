@@ -7,6 +7,7 @@ Copyright (C) 2024 Universal Devices
 
 import json
 import os
+import re
 from .editor import Editors 
 from .log import LOGGER
 from .validator import validate_id, getValidName
@@ -84,11 +85,26 @@ class CommandDetails:
             LOGGER.critical(str(ex))
             raise
 
+    def getHumanReadableCommandName(self):
+        if self.name:
+            pattern = r'^set([A-Z])'
+            cmd_name = re.sub(pattern, r'\1', self.name)
+            if self.name != cmd_name:
+                pattern = r'([A-Z][a-z0-9]*)'
+
+                matches = re.findall(pattern, cmd_name)
+    
+                # Join the matches with a space if three matches are found
+                if len(matches) > 1:
+                    cmd_name = ' '.join(matches)
+            return cmd_name
+
     def toIoX(self, node_id:str)->(str,str):
         nls = ""
         cmd = ""
         if self.name:
-            nls+=f"CMD-{node_id}-{self.id}-NAME = {self.name}"
+            cmd_name = self.getHumanReadableCommandName()
+            nls+=f"CMD-{node_id}-{self.id}-NAME = {cmd_name}"
         if len(self.params) == 0:
             cmd = f"<cmd id=\"{self.id}\"/>"
         else:

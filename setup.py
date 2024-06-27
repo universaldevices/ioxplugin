@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='ioxplugin',
-    version='1.1.6',
+    version='1.1.7',
     packages=find_packages(),
     description='IoX Plugin Helper Package',
     long_description=open('README.md').read(),
@@ -19,5 +19,5 @@ setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-    python_requires='>=3.6',
+    python_requires='>=3.9',
 )

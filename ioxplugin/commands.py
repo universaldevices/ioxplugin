@@ -51,6 +51,11 @@ class CommandParam:
 
         return param, nls
 
+    def getValidFunctionBodyName(self):
+        if not self.name:
+            return self.id
+        return getValidName(self.name, False)
+
     def validate(self)->bool:
         return validate_id(self.id)
 

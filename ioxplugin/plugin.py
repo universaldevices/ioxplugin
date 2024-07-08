@@ -147,7 +147,7 @@ class Plugin:
 
         return n and e
 
-    def areNodesStatic():
+    def areNodesStatic(self):
         return self.meta.areNodesStatic()
     
     def getPythonPHClassName(self):

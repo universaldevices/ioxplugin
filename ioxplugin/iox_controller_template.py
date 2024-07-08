@@ -76,14 +76,17 @@ CONTROLLER_TEMPLATE_BODY='''
         if config is None or config['nodes'] is None or len(config['nodes']) <= 0:
             config = {}
             config['nodes'] = []
-        for child in self.children:
-            try:
-                config['nodes'].append({'nodeDefId': child['id'], 'address':
-                child['id'], 'name': child['name'],
-                'primaryNode': child['parent']})
-            except Exception as ex:
-                LOGGER.error(str(ex))
-                return
+
+        if self.plugin.areNodesStatic():
+            for child in self.children:
+                try:
+                    config['nodes'].append({'nodeDefId': child['id'], 'address':
+                    child['id'], 'name': child['name'],
+                    'primaryNode': child['parent']})
+                except Exception as ex:
+                    LOGGER.error(str(ex))
+                    return
+
         for node in config['nodes']:
             if node['nodeDefId'] == self.id:
                 continue

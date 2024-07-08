@@ -153,6 +153,13 @@ class PluginMetaData:
             LOGGER.warn(str(ex))
             return "ud_plugin_version=\"1.0.0\""
 
+    def areNodesStatic(self):
+        try:
+            return self.metadata['nodesAreStatic']
+        except Exception as ex:
+            return True #default
+
+
     def getPythonPHClassName(self):
         name= f'{self.getName()}ProtocolHandler'.replace(' ','').replace('_','')
         return name[0].upper()+name[1:]

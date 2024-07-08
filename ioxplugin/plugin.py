@@ -146,6 +146,9 @@ class Plugin:
         e = self.editors.validate()
 
         return n and e
+
+    def areNodesStatic():
+        return self.meta.areNodesStatic()
     
     def getPythonPHClassName(self):
         return self.meta.getPythonPHClassName()

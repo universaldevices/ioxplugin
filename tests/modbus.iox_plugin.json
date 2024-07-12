@@ -2,7 +2,7 @@
     "plugin": {
           "name":"modbus",
           "description":"Modbus snippet",
-          "author":"UD",
+          "publisher":"UD",
           "language": "python3",
           "executableName":"modbus.py",
           "installScript":"install.sh",

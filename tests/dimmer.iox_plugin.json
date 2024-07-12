@@ -1,0 +1,130 @@
+{
+    "plugin": {
+          "name":"dimmer",
+          "description":"A dimmer",
+          "publisher":"UD",
+          "language": "python3",
+          "executableName":"dimmer.py",
+          "installScript":"install.sh",
+          "documentationLink":"docs",
+          "licenseLink":"license",
+          "shortPoll":60,
+          "longPoll":600,
+          "profileVersion":"3.0.0",
+          "initialLogLevel":"INFO",
+          "enableDiscovery":true,
+          "enableOAUTH2":false,
+          "worksOnPolisy":true,
+          "worksOnEisy":true,
+          "requiresIoXAccess": false,
+          "requirements": [],
+          "version": "1.0.0"
+    },
+    "editors": [
+        {
+            "id": "onlevel",
+            "min": 0,
+            "max": 100,
+            "uom": "Percent | 51"
+        },
+        {
+            "id": "ramprate",
+            "min": 0,
+            "max": 600,
+            "uom": "Second | 57"
+        }
+    ],
+    "nodedefs": [
+        {
+            "id":"dimmer",
+            "name":"Dimmer",
+            "icon":"GenericRspCtl",
+            "properties": [
+                {
+                    "id":"ST", 
+                    "name": "Status",
+                    "editor": {
+                        "idref": "onlevel"
+                    },
+                    "is_settable": false
+                },
+                {
+                    "id": "RAMP_RATE",
+                    "name": "Ramp Rate",
+                    "editor": {
+                        "idref": "ramprate"
+                    } ,
+                    "is_settable": true
+                },
+                {
+                    "id": "ON_LEVEL",
+                    "name": "On Level",
+                    "editor": {
+                        "idref": "onlevel"
+                    } ,
+                    "is_settable": true
+                }
+            ],
+            "commands": {
+                "accepts": [
+                    {
+                        "id": "on",
+                        "name": "On",
+                        "params": [
+                            {
+                                "id": "onlevel",
+                                "editor": {
+                                    "idref": "onlevel"
+                                },
+                                "name": "Level"
+                            },
+                            {
+                                "id": "ramprate",
+                                "editor": {
+                                    "idref": "ramprate"
+                                },
+                                "name": "Ramp Rate"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "off",
+                        "name": "Off",
+                        "params": [
+                            {
+                                "id": "ramprate",
+                                "editor": {
+                                    "idref": "ramprate"
+                                },
+                                "name": "Ramp Rate"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "faston",
+                        "name": "Fast On"
+                    },
+                    {
+                        "id": "fastoff",
+                        "name": "Fast Off"
+                    }
+                ],
+                "sends": [
+                    {
+                        "id": "status",
+                        "name": "Status",
+                        "params": [
+                            {
+                                "id": "level",
+                                "editor": {
+                                    "idref": "onlevel"
+                                },
+                                "name": "Level"
+                            }
+                        ]
+                    }
+                ]
+            } 
+        }
+    ]
+}

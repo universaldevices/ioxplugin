@@ -3,7 +3,7 @@
           "name":"modbus",
           "description":"Modbus snippet",
           "author":"UD",
-          "language": 0,
+          "language": "python3",
           "executableName":"modbus.py",
           "installScript":"install.sh",
           "documentationLink":"docs",
@@ -11,7 +11,7 @@
           "shortPoll":60,
           "longPoll":600,
           "profileVersion":"3.0.0",
-          "initialLogLevel":3,
+          "initialLogLevel":"INFO",
           "enableDiscovery":false,
           "enableOAUTH2":false,
           "worksOnPolisy":true,
@@ -60,14 +60,17 @@
             "max": 1,
             "uom": "Index | 25",
             "index_names": [
-                "Eanbled|1",
-                "Disabled|0"
+                "Eanbled | 1",
+                "Disabled | 0"
             ]
         }
     ],
     "protocol": {
         "name": "Modbus",
-        "is_rtu": false
+        "config": {
+            "is_rtu": false,
+            "byte_order": "Endian.BIG"
+        }
     },
     "nodedefs": [
         {

@@ -343,6 +343,11 @@ def astInitBodyController():
             args=[ast.Attribute(value=ast.Name(id='polyglot', ctx=ast.Load()), attr='CUSTOMDATA', ctx=ast.Load()), ast.Attribute(value=ast.Name(id='self', ctx=ast.Load()), attr='customDataHandler', ctx=ast.Load())],
             keywords=[]
         )),
+        ast.Expr(value=ast.Call(
+            func=ast.Attribute(value=ast.Attribute(value=ast.Name(id='self', ctx=ast.Load()), attr='poly', ctx=ast.Load()), attr='subscribe', ctx=ast.Load()),
+            args=[ast.Attribute(value=ast.Name(id='polyglot', ctx=ast.Load()), attr='BONJOUR', ctx=ast.Load()), ast.Attribute(value=ast.Name(id='self', ctx=ast.Load()), attr='bonjourHandler', ctx=ast.Load())],
+            keywords=[]
+        )),
         ast.Assign(
             targets=[
                 ast.Attribute(

@@ -312,6 +312,31 @@ class __PROTOCOL_HANDLER_CLASS__:
     def callOAuthApi(self, method='GET', url=None, params=None, body=None)->bool:
         return self.controller.callOAuthApi(method, url, params, body)
 
+
+    ###
+    # Device Discovery
+    ###
+
+    ##
+    # You can search the network using mDNS. To do so, call this method
+    # type : string = is the type of device you are looking for. If None, then everything
+    # subtypes : string = is a list of subtypes [string] you are looking for. If None, then everything
+    # protocol : string = either udp or tcp. If None, then everything
+    # If any results, processMDNSResults method will be called with a list of devices and their info
+    ##
+    def searchForDevicesUsingMDNS(self, type:str, subtypes:str, protocol:str):
+        self.controller.poly.bonjour(type, subtypes, protocol)
+
+    ##
+    # If search using mDNS is successful, this method is called with an array of devices. 
+    ##
+    def processMDNSResults(self, results:[]):
+        try:
+            # Fill out this method based on the results
+            return
+        except Exception as ex:
+            LOGGER.error(str(ex))
+
     '''
 
 class IoXNodeImplGen():

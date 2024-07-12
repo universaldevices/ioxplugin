@@ -33,6 +33,16 @@ CONTROLLER_TEMPLATE_BODY='''
 
         return True
 
+    def bonjourHandler(self, message):
+        try:
+            command = message['command']
+            if command == None or command != "bonjour": 
+                return
+            mdns = message['mdns']
+            self.protocolHandler.processMDNSResults(mdns)
+        except Exception as ex:
+            LOGGER.error(str(ex))
+
     def start(self):
         LOGGER.info(f'Starting... ')
         try:

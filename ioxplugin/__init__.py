@@ -1,6 +1,7 @@
 #iox plugin
 
 from .plugin import Plugin 
+from .store_entry import StoreEntry
 from .plugin_meta import PluginMetaData 
 from .protocol import Protocol
 from .commands import Commands, CommandDetails, CommandParam 

@@ -7,6 +7,7 @@ Copyright (C) 2024 Universal Devices
 
 from .log import LOGGER
 import os
+import uuid
 
 DEFAULT_REQ_PKGS=["udi_interface>=3.0.57", "ioxplugin"]
 
@@ -33,9 +34,9 @@ class PluginMetaData:
             LOGGER.critical(str(ex))
             return None
 
-    def getAuthor(self):
+    def getPublisher(self):
         try:
-            return self.metadata['author']
+            return self.metadata['publisher']
         except Exception as ex:
             LOGGER.critical(str(ex))
             return None
@@ -68,14 +69,14 @@ class PluginMetaData:
             LOGGER.critical(str(ex))
             return None
 
-    def geLicenseLink(self):
+    def getLicenseLink(self):
         try:
             return self.metadata['licenseLink']
         except Exception as ex:
             LOGGER.critical(str(ex))
             return None
 
-    def geeShortPoll(self):
+    def getShortPoll(self):
         try:
             return self.metadata['shortPoll']
         except Exception as ex:
@@ -101,42 +102,49 @@ class PluginMetaData:
             return self.metadata['initialLogLevel']
         except Exception as ex:
             LOGGER.critical(str(ex))
-            return None
+            return "INFO"
 
-    def getEnableDiscovery(self):
+    def getStatus(self):
         try:
-            return self.metadata['enableDiscovery']
+            return (self.metadata['status']).lower()
         except Exception as ex:
             LOGGER.critical(str(ex))
             return None
+
+    def getEnableFileUpload(self):
+        try:
+            return bool(self.metadata['enableFileUpload'])
+        except Exception as ex:
+            LOGGER.critical(str(ex))
+            return False
 
     def getEnableOAUTH2(self):
         try:
-            return self.metadata['enableOAUTH2']
+            return bool(self.metadata['enableOAUTH2'])
         except Exception as ex:
             LOGGER.critical(str(ex))
-            return None
+            return False
 
     def getWorksOnPolisy(self):
         try:
-            return self.metadata['worksOnPolisy']
+            return bool(self.metadata['worksOnPolisy'])
         except Exception as ex:
             LOGGER.critical(str(ex))
-            return None
+            return False
 
     def getWorksOnEisy(self):
         try:
-            return self.metadata['worksOnEisy']
+            return bool(self.metadata['worksOnEisy'])
         except Exception as ex:
             LOGGER.critical(str(ex))
-            return None
+            return False
 
     def getRequiresIoXAccess(self):
         try:
-            return self.metadata['requiresIoXAccess']
+            return bool(self.metadata['requiresIoXAccess'])
         except Exception as ex:
             LOGGER.critical(str(ex))
-            return None
+            return False
 
     def getRequirements(self):
         out = DEFAULT_REQ_PKGS
@@ -159,10 +167,85 @@ class PluginMetaData:
         except Exception as ex:
             return True #default
 
-
     def getPythonPHClassName(self):
         name= f'{self.getName()}ProtocolHandler'.replace(' ','').replace('_','')
         return name[0].upper()+name[1:]
 
     def getPythonPHFileName(self):
         return f'{self.getPythonPHClassName()}.py'
+
+    def getStoreEntryContent(self):
+        uuid1 = uuid.uuid4()
+
+        if not self.getName() :
+            LOGGER.error("plugin needs a name")
+            return None
+
+        if not self.getPublisher() :
+            LOGGER.error("plugin needs an author")
+            return None
+
+        if not self.getExecutableName():
+            LOGGER.error("plugin needs an executable name")
+            return None
+
+        install_script = "install.sh"
+        if self.getInstallScript():
+            install_script = self.getInstallScript()
+
+        profileVersion = "3.0.0"
+        if self.getProfileVersion():
+            profileVersion = self.getProfileVersion()
+
+        language = "python3"
+        slang = self.getLanguage()
+        if self.getLanguage() != language:
+            LOGGER.warning(f"{self.getLanguage()} is not a valid language ... defaulting to {language}")
+
+        status = "active"
+        if self.getStatus():
+            status = self.getStatus()
+
+        shortPoll = 300
+        if self.getShortPoll():
+            shortPoll = self.getShortPoll()
+
+        longPoll = 900
+        if self.getLongPoll():
+            longPoll = self.getLongPoll()
+
+        desc = "Generated bo IoX Plugin Develper"
+        if self.getDescription():
+            desc = self.getDescription()
+        
+        docs =  "https://developer.isy.io"
+        if self.getDocumentationLink():
+            docs = self.getDocumentationLink()
+
+        lic = "https://developer.isy.io"
+        if self.getLicenseLink():
+            lic = self.getLicenseLink()
+
+        return {
+            "uuid":str(uuid1),
+            "name":self.getName(),
+            "author":self.getPublisher(),
+            "profile_version":profileVersion,
+            "language":language,
+            "install":install_script,
+            "executable":self.getExecutableName(),
+            "status":status,
+            "shortPoll":shortPoll,
+            "logLevel":self.getInitialLogLevel(),
+            "authorize":'true' if self.getEnableOAUTH2() else 'false',
+            "polisy":'true' if self.getWorksOnPolisy() else 'false',
+            "eisy":'true' if self.getWorksOnEisy() else 'false',
+            "isyAccess":'true' if self.getRequiresIoXAccess() else 'false',
+            "fileUpload":'true' if self.getEnableFileUpload() else 'false', 
+            "docs":docs,
+            "license":lic,
+            "desc":desc
+        }
+
+
+

@@ -294,7 +294,7 @@ class __PROTOCOL_HANDLER_CLASS__:
     # You can use the text just as an arbitrary/freeform text that is displayed as is
     # in the clients without any processing.
     ###
-    def setProperty(node_addr:str, property_id:str, value, force:bool, text:str=None):
+    def updateProperty(node_addr:str, property_id:str, value, force:bool, text:str=None):
         try:
             node = self.getNode(node_addr)
             if node == None:

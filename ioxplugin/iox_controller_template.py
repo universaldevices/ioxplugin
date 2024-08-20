@@ -87,7 +87,7 @@ CONTROLLER_TEMPLATE_BODY='''
             config = {}
             config['nodes'] = []
 
-        if self.plugin.areNodesStatic():
+        if self.protocolHandler.plugin.areNodesStatic():
             for child in self.children:
                 try:
                     config['nodes'].append({'nodeDefId': child['id'], 'address':

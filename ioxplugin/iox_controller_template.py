@@ -166,13 +166,16 @@ CONTROLLER_TEMPLATE_BODY='''
 
 
     def customNSHandler(self, key, data):
-        if not self.oauthService:
-            return 
-        # This provides the oAuth config (key='oauth') and saved oAuth tokens (key='oauthTokens))
-        try:
-            self.oauthService.customNsHandler(key, data)
-        except Exception as ex:
-            LOGGER.error(ex)
+        if key == 'oauth':
+            # This provides the oAuth config (key='oauth') and saved oAuth tokens (key='oauthTokens))
+            if not self.oauthService:
+                return 
+            try:
+                self.oauthService.customNsHandler(key, data)
+            except Exception as ex:
+                LOGGER.error(ex)
+        else:
+            self.protocolHandler.customParamHandler(key, data)
 
     def oauthHandler(self, token):
         if not self.oauthService:

@@ -255,6 +255,44 @@ class __PROTOCOL_HANDLER_CLASS__:
             return False
 
     ###
+    # Creates a user defined/custom parameter for key/value pairs of your own and stores in the 
+    # database. Whenever a key is updated the customParamHandler (below) is called with the 
+    # key and its updated value. example:
+    # myKey = self.createCustomParam('myKey')
+    # self.updateCustomParam(myKey, "my value" )
+    ###
+    def createCustomParam(self, key):
+        try:
+            return Custom(self.controller.poly, key)
+        except Exception as ex:
+            LOGGER.error(f'create custom param failed ...')
+            return None
+
+    ###
+    # Updates a user defined param. Whenever this method is called, customParamHandler is called
+    # with the updated values.
+    ###
+    def updateCustomParam(self, key:Custom, value:str):
+        try:
+            key = value
+        except Exception as ex:
+            LOGGER.error(f'failed updating custom param ...' )
+
+
+    ####
+    # This method is called when a custom value (key/value) pair that's stored in the 
+    # database is changed. You can use this method to manage custom parameters of your own
+    # in the database.
+    ####
+    def customParamHandler(self, key, value):
+        try:
+            return True
+        except Exception as ex:
+            LOGGER.error(f'process custom param failed .... ')
+            return False
+
+
+    ###
     # Convenient methods to access the system
     ###
 

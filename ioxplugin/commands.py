@@ -9,7 +9,7 @@ import json
 import os
 import re
 from .editor import Editors 
-from .log import LOGGER
+from .log import PLUGIN_LOGGER
 from .validator import validate_id, getValidName
 
 
@@ -20,7 +20,7 @@ class CommandParam:
         self.name = None
         self.editor: None
         if param == None:
-            LOGGER.debug("no parameters given for the command parameter")
+            PLUGIN_LOGGER.debug("no parameters given for the command parameter")
             return
 
         try:
@@ -31,7 +31,7 @@ class CommandParam:
             if 'editor' in param:
                 self.editor = Editors.getEditors().addEditor(param['editor']) 
         except Exception as ex:
-            LOGGER.critical(str(ex))
+            PLUGIN_LOGGER.critical(str(ex))
             raise
 
     def toIoX(self, node_id:str, init_prop=None)->(str,str):
@@ -69,7 +69,7 @@ class CommandDetails:
         self.params = {}
         self.init_prop = None
         if command == None:
-            LOGGER.critical("no commands given for the command ... ")
+            PLUGIN_LOGGER.critical("no commands given for the command ... ")
             return
 
         try: 
@@ -87,7 +87,7 @@ class CommandDetails:
                 self.id = "x_query"
 
         except Exception as ex:
-            LOGGER.critical(str(ex))
+            PLUGIN_LOGGER.critical(str(ex))
             raise
 
     def getHumanReadableCommandName(self):
@@ -135,7 +135,7 @@ class CommandDetails:
                 return rc
             return False
         except Exception as ex:
-            LOGGER.critical(str(ex))
+            PLUGIN_LOGGER.critical(str(ex))
             return False
 
     def hasParams(self):
@@ -150,7 +150,7 @@ class Commands:
         self.acceptCommands={}
         self.sendCommands={}
         if commands == None:
-            LOGGER.critical("no commands given for the commands class ... ")
+            PLUGIN_LOGGER.critical("no commands given for the commands class ... ")
             raise ValueError("no commands given for the commands class ... ")
             return
         try:
@@ -167,7 +167,7 @@ class Commands:
                     self.sendCommands[s.id]=s
 
         except Exception as ex:
-            LOGGER.critical(str(ex))
+            PLUGIN_LOGGER.critical(str(ex))
             raise
 
     def addInit(self, type:str, property_id:str, property_name:str, editor_id:str):
@@ -226,7 +226,7 @@ class Commands:
             return cmds,nls
 
         except Exception as ex:
-            LOGGER.critical(str(ex))
+            PLUGIN_LOGGER.critical(str(ex))
             return None, None
 
     def validate(self)->bool:
@@ -242,5 +242,5 @@ class Commands:
 
             return rc
         except Exception as ex:
-            LOGGER.error(str(ex))
+            PLUGIN_LOGGER.error(str(ex))
             return False

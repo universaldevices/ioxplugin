@@ -15,3 +15,4 @@ tests/__pycache__/*
 .vscode/*
 ioxplugin.egg-info/
 ioxplugin.egg-info/*
+store_entry.json

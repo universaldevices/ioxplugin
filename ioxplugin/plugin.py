@@ -10,7 +10,7 @@ import json,os
 from .nodedef import NodeDefs
 from .editor import Editors
 from .plugin_meta import PluginMetaData
-from .log import init_ext_logging, LOGGER
+from .log import init_ext_logging, PLUGIN_LOGGER
 from .iox_profile import ProfileWriter
 from .iox_node_gen import IoXNodeGen
 from .main_gen import PluginMain
@@ -45,7 +45,7 @@ class Plugin:
         
         self.isValid = False
         if plugin_file == None:
-            LOGGER.critical("plugin file does not exist ... ")
+            PLUGIN_LOGGER.critical("plugin file does not exist ... ")
             return
 
         self.profileWriter=ProfileWriter(True, self.path)
@@ -53,7 +53,7 @@ class Plugin:
         try:
             self.isValid=self.validate_json(schema, plugin_file)
             if not self.isValid:
-                LOGGER.critical("not a valid plugin configuration file ... ")
+                PLUGIN_LOGGER.critical("not a valid plugin configuration file ... ")
                 return
             with open(plugin_file, 'r') as file:
                 plugin_json = json.load(file)
@@ -74,7 +74,7 @@ class Plugin:
 
     def toIoX(self)->bool:
         if not self.validate():
-            LOGGER.critical("invalid json file ... ")
+            PLUGIN_LOGGER.critical("invalid json file ... ")
             return False
 
         try:
@@ -90,7 +90,7 @@ class Plugin:
             if nls:
                 self.profileWriter.writeToNLS(nls)
         except Exception as ex:
-            LOGGER.critical(str(ex))
+            PLUGIN_LOGGER.critical(str(ex))
 
         return True
 
@@ -98,7 +98,7 @@ class Plugin:
         ''' 
             Does not suppot file refernences
         '''
-        LOGGER.info('fastjsonschema does not currently support file references ... ignoring validation request.')
+        PLUGIN_LOGGER.info('fastjsonschema does not currently support file references ... ignoring validation request.')
         return True
 
         #use later when supported
@@ -159,17 +159,17 @@ class Plugin:
     def generateCode(self, path:str):
         try:
             if path == None:
-                LOGGER.critical("need path to write python files to")
+                PLUGIN_LOGGER.critical("need path to write python files to")
                 raise Exception("path to write python files to")
 
             name = self.meta.getName()
             excecutableName = self.meta.getExecutableName()
             if name == None or excecutableName == None:
-                LOGGER.critical("need name for the plugin and the executable")
+                PLUGIN_LOGGER.critical("need name for the plugin and the executable")
                 raise Exception("need name for the plugin and the executable")
 
             if self.nodedefs.size() == 0:
-                LOGGER.critical("no nodedefs defined ...")
+                PLUGIN_LOGGER.critical("no nodedefs defined ...")
                 raise Exception("no nodedefs")
 
             main = PluginMain(path, self.meta, self.nodedefs)
@@ -184,7 +184,7 @@ class Plugin:
 
 
         except Exception as ex:
-            LOGGER.critical(str(ex))
+            PLUGIN_LOGGER.critical(str(ex))
             raise Exception(ex)
 
 def generate_code():

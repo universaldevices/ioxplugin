@@ -1,7 +1,7 @@
 import ast, astor
 from .nodedef import NodeDefDetails, NodeProperties
 from .commands import CommandDetails, CommandParam
-from .log import LOGGER
+from .log import PLUGIN_LOGGER
 from .validator import getValidName
 from ioxplugin import ast_util 
 from .uom import UOMs
@@ -11,7 +11,7 @@ from .iox_controller_template import CONTROLLER_TEMPLATE_BODY, CONTROLLER_TEMPLA
 class IoXNodeGen():
     def __init__(self, nodedef:NodeDefDetails, path:str):
         if nodedef == None or path == None:
-            LOGGER.critical("need node def and the path to save the python file")
+            PLUGIN_LOGGER.critical("need node def and the path to save the python file")
             raise Exception ("need node def and the path to save the python file")
 
         self.nodedef = nodedef
@@ -103,7 +103,7 @@ class IoXNodeGen():
         try:
             drivers = self.nodedef.properties.getPG3Drivers()
         except Exception as ex:
-            LOGGER.critical(str(ex))
+            PLUGIN_LOGGER.critical(str(ex))
             raise
 
         class_def.body.append(ast_util.astComment('This is a list of properties that were defined in the nodedef'))
@@ -124,7 +124,7 @@ class IoXNodeGen():
         try:
             commands = self.nodedef.getPG3Commands()
         except Exception as ex:
-            LOGGER.critical(str(ex))
+            PLUGIN_LOGGER.critical(str(ex))
             raise
         
         if self.nodedef.isController:

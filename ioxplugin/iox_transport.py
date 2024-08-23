@@ -5,7 +5,7 @@
 Configuration parameters for transport
 Copyright (C) 2024 Universal Devices
 """
-from .log import LOGGER
+from .log import PLUGIN_LOGGER
 
 class IoXTCPTransport():
     def __init__(self, comm_params):

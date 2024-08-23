@@ -1,5 +1,4 @@
 import os
-from .log import LOGGER
 
 '''
 This class creates an implemenation class for the Node class
@@ -380,7 +379,7 @@ class __PROTOCOL_HANDLER_CLASS__:
 class IoXNodeImplGen():
     def __init__(self, path:str, file_name:str, class_name:str):
         if class_name == None or file_name == None or path == None:
-            LOGGER.critical("need path, filename, and class_name ")
+            PLUGIN_LOGGER.critical("need path, filename, and class_name ")
             raise Exception ("need path, filename, and class_name") 
 
         self.file_path=f'{path}/{file_name}'
@@ -389,7 +388,7 @@ class IoXNodeImplGen():
 
     def create(self):
         if os.path.exists(self.file_path): 
-            LOGGER.info(f"{self.file_path} already exists ... ignoring")
+            PLUGIN_LOGGER.info(f"{self.file_path} already exists ... ignoring")
             #do not redo if already exists
             return
         with open(self.file_path, 'w') as file:

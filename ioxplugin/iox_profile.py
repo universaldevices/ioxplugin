@@ -5,7 +5,7 @@
 Manage profiles (editor, nls, and nodedef)
 Copyright (C) 2024 Universal Devices
 """
-from .log import LOGGER
+from .log import PLUGIN_LOGGER
 import os
 
 NLS_PATH="nls"
@@ -31,7 +31,7 @@ class ProfileWriter:
             self.__preferfs(is_new)  
 
         except Exception as ex:
-            LOGGER.critical(str(ex))
+            PLUGIN_LOGGER.critical(str(ex))
 
     def __preferfs(self, is_new:bool):
         if not os.path.exists(self.path):
@@ -58,7 +58,7 @@ class ProfileWriter:
                 file.write(nls)
             return True
         except Exception as ex:
-            LOGGER.critical(str(ex))
+            PLUGIN_LOGGER.critical(str(ex))
             return False 
 
     def writeToEditor(self,editor:str)->bool:
@@ -67,7 +67,7 @@ class ProfileWriter:
                 file.write(editor)
             return True
         except Exception as ex:
-            LOGGER.critical(str(ex))
+            PLUGIN_LOGGER.critical(str(ex))
             return False 
 
     def writeToNodeDef(self,nodedef:str)->bool:
@@ -76,5 +76,5 @@ class ProfileWriter:
                 file.write(nodedef)
             return True
         except Exception as ex:
-            LOGGER.critical(str(ex))
+            PLUGIN_LOGGER.critical(str(ex))
             return False 

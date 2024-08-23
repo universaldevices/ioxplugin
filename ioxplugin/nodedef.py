@@ -7,7 +7,7 @@ Copyright (C) 2024 Universal Devices
 
 from .node_properties import NodeProperties
 from .commands import Commands
-from .log import LOGGER
+from .log import PLUGIN_LOGGER
 from .validator import validate_id
 
 
@@ -22,7 +22,7 @@ class NodeDefDetails:
         self.commands:Commands
 
         if node == None:
-            LOGGER.critical("no node was given ... ")
+            PLUGIN_LOGGER.critical("no node was given ... ")
             return
         try: 
             if 'id' in node:
@@ -39,7 +39,7 @@ class NodeDefDetails:
                 self.commands=Commands(node['commands'])
 
         except Exception as ex:
-            LOGGER.critical(str(ex))
+            PLUGIN_LOGGER.critical(str(ex))
             raise
 
     def getPrecisions(self):
@@ -103,14 +103,14 @@ class NodeDefs:
         self.nodedefs = {}
 
         if nodes == None:
-            LOGGER.critical("no nodes were given ... ")
+            PLUGIN_LOGGER.critical("no nodes were given ... ")
             return
         try:
             for node in nodes:
                 n = NodeDefDetails(node)
                 self.nodedefs[n.id] = n
         except Exception as ex:
-            LOGGER.critical(str(ex))
+            PLUGIN_LOGGER.critical(str(ex))
             raise
 
     def getControllerNodeDef(self):
@@ -198,5 +198,5 @@ class NodeDefs:
                     rc = False
             return rc
         except Exception as ex:
-            LOGGER.critical(str(ex))
+            PLUGIN_LOGGER.critical(str(ex))
             return False

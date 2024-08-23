@@ -6,7 +6,7 @@ Copyright (C) 2024 Universal Devices
 """
 
 from .editor import Editors
-from .log import LOGGER
+from .log import PLUGIN_LOGGER
 from .validator import validate_id 
 
 
@@ -38,7 +38,7 @@ class NodePropertyDetails:
             if 'protocol' in node_property:
                 self.protocol_data = node_property['protocol']
         except Exception as ex:
-            LOGGER.critical(str(ex))
+            PLUGIN_LOGGER.critical(str(ex))
             raise
 
     def isSet(self)->bool:
@@ -59,7 +59,7 @@ class NodeProperties:
     def __init__(self, node_properties):
         self.node_properties={}
         if node_properties == None:
-            LOGGER.critical("no node properties were given ... ")
+            PLUGIN_LOGGER.critical("no node properties were given ... ")
             return
         try:
             for node_property in node_properties:
@@ -67,12 +67,12 @@ class NodeProperties:
                 self.node_properties[np.id]=np
                 
         except Exception as ex:
-            LOGGER.critical(str(ex))
+            PLUGIN_LOGGER.critical(str(ex))
             raise
 
     def getProperty(self, property):
         if property == None:
-            LOGGER.warn("property is null ... ")
+            PLUGIN_LOGGER.warn("property is null ... ")
             return
 
         return self.node_properties[property]
@@ -91,7 +91,7 @@ class NodeProperties:
             sts += "\n</sts>"
             return sts, nls
         except Exception as ex:
-            LOGGER.critical(str(ex))
+            PLUGIN_LOGGER.critical(str(ex))
 
     '''
         Returns a dictory of the form {property_id, protocol_data_object}
@@ -145,7 +145,7 @@ class NodeProperties:
                     rc = False
             return rc
         except Exception as ex:
-            LOGGER.critical(str(ex))
+            PLUGIN_LOGGER.critical(str(ex))
 
 
     def getAll(self):

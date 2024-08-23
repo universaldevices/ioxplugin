@@ -7,7 +7,7 @@ Copyright (C) 2024 Universal Devices
 
 import json
 import os
-from .log import LOGGER
+from .log import PLUGIN_LOGGER
 from .validator import validate_id
 
 class EditorDetails:
@@ -23,7 +23,7 @@ class EditorDetails:
         self.index_names=[]
         self.idref=None
         if editor == None:
-            LOGGER.critical("no editor given for EditorDetails ...")
+            PLUGIN_LOGGER.critical("no editor given for EditorDetails ...")
             raise
         try:
             if 'idref' in editor:
@@ -49,14 +49,14 @@ class EditorDetails:
                 if 'index_names' in editor:
                     self.index_names = editor['index_names']
         except Exception as ex:
-            LOGGER.critical(str(ex))
+            PLUGIN_LOGGER.critical(str(ex))
             raise
 
 
     #returns editors + nls  
     def toIoX(self)->(str, str):
         if self.id == None:
-            LOGGER.warn("editor without an id ... ")
+            PLUGIN_LOGGER.warn("editor without an id ... ")
             return None, None
         nls = ""
         editor = f"<editor id=\"{self.id}\">\n<range uom=\"{self.uom}\" "
@@ -64,7 +64,7 @@ class EditorDetails:
             editor += (f"subset=\"{self.subset}\"")
         else:
             if self.min == None or self.max == None:
-                LOGGER.warn(f"Missing min/max for editor id {self.id}")
+                PLUGIN_LOGGER.warn(f"Missing min/max for editor id {self.id}")
                 return None, None
             editor += (f"min=\"{self.min}\" max=\"{self.max}\"")
             if self.precision != None:
@@ -113,12 +113,12 @@ class Editors:
 
     def addEditor(self, editor)->EditorDetails:
         if editor == None:
-            LOGGER.warn("no editors given to be added ...")
+            PLUGIN_LOGGER.warn("no editors given to be added ...")
             return None
         try:
             ed=EditorDetails(editor)
             if (ed.id == None or ed.id == '') and not ed.idref:
-                LOGGER.warn("the editor is missing id ... ignoring")
+                PLUGIN_LOGGER.warn("the editor is missing id ... ignoring")
                 return None
             if ed.isRef() :
                 self.refs.append(ed.idref)
@@ -144,7 +144,7 @@ class Editors:
             editors += ("</editors>")
             return editors, nls
         except Exception as ex:
-            LOGGER.critical(str(ex))
+            PLUGIN_LOGGER.critical(str(ex))
             raise
 
     def validate(self):
@@ -153,7 +153,7 @@ class Editors:
             #warn if a ref does not exist
             for idref in self.refs:
                 if idref not in self.editors:
-                    LOGGER.critical(f"no editor with id of \"{idref}\" exists, so it cannot be referenced ... ")
+                    PLUGIN_LOGGER.critical(f"no editor with id of \"{idref}\" exists, so it cannot be referenced ... ")
                     rc = False
 
             for e in self.editors:
@@ -161,7 +161,7 @@ class Editors:
                     rc = False
             return rc
         except Exception as ex:
-            LOGGER.critical(str(ex))
+            PLUGIN_LOGGER.critical(str(ex))
             return False
             
     @staticmethod

@@ -2,7 +2,7 @@
 import astor
 from .nodedef import NodeDefs, NodeDefDetails, NodeProperties
 from .plugin_meta import PluginMetaData
-from .log import LOGGER
+from .log import PLUGIN_LOGGER
 from ioxplugin import ast_util
 from .iox_node_gen import IoXNodeGen
 from .iox_main_template import IOX_MAIN_TEMPLATE
@@ -19,7 +19,7 @@ class PluginMain:
     def create(self):
         exec_name = self.plugin_info.getExecutableName()
         if exec_name == None:
-            LOGGER.critical("need the executable name ...") 
+            PLUGIN_LOGGER.critical("need the executable name ...") 
             return False
 
         file_path = f'{self.path}/{exec_name}'

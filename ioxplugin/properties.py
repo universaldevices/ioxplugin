@@ -7,7 +7,7 @@ Copyright (C) 2024 Universal Devices
 
 import json
 import os
-from .log import LOGGER
+from .log import PLUGIN_LOGGER
 
 PROPERTIES_SCHEMA_FILE="schemas/properties.schema.json"
 
@@ -19,7 +19,7 @@ class PropertyDetails:
             self.id = parsed_list[1] 
             self.description = parsed_list[0] 
         except Exception as ex:
-            LOGGER.critical(str(ex))
+            PLUGIN_LOGGER.critical(str(ex))
             raise
 
 class Properties:
@@ -30,7 +30,7 @@ class Properties:
                 json_data = json.load(file)
                 self.__init_elements(json_data)
        except Exception as ex:
-            LOGGER.critical(str(ex))
+            PLUGIN_LOGGER.critical(str(ex))
             raise
 
     def __init_elements(self, properties:str)->object:

@@ -4,7 +4,7 @@
           "description":"A dimmer",
           "publisher":"UD",
           "language": "python3",
-          "executableName":"dimmer.py",
+          "executableName":"test_ioxplugin.py",
           "installScript":"install.sh",
           "documentationLink":"docs",
           "licenseLink":"license",

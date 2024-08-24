@@ -16,7 +16,7 @@ if not pg3wss.connect('admin','admin'):
     exit(1)
 PLUGIN_LOGGER.debug('connected ..')
 #pg3wss.await_completion()
-
+time.sleep(20000)
 
 plugin_path=(f"{curdir}/tests/dimmer.iox_plugin.json")
 storeOps=PluginStoreOps('Local')

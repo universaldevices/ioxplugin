@@ -215,6 +215,16 @@ class PluginMetaData:
         except Exception as ex:
             return False
 
+    def getInstalledSlot(self):
+        '''
+            Returns the slot number in which this plugin 
+            has already been installed
+        '''
+        try:
+            return self.metadata['installedSlot']=='1'
+        except Exception as ex:
+            return -1
+
     def getStoreEntryContent(self):
         uuid1 = uuid.uuid4()
 

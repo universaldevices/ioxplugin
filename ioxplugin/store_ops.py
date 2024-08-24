@@ -34,10 +34,11 @@ LOCAL_STORE_URL_INSERT=f"{LOCAL_STORE_URL}/insert"
 STORE_URL_LIST=f"{LOCAL_STORE_URL}/list?store="
 STORE_ENTRY_FILE='store_entry.json'
 
-class PG3User:
+class PG3Settings:
 
-    def __init__(self, user):
+    def __init__(self, user, settings):
         self.user=user
+        self.settings=settings
 
     def getId(self):
         return self.user['id']
@@ -54,6 +55,9 @@ class PG3User:
     def getTopic(self):
         return f"{TOPIC_BASE}/{self.getName()}"
 
+    def getUuid(self):
+        return self.settings['macAddress']
+
     def getClientId(self):
         # generate client ID with pub prefix randomly
         return f'ioxplugin-wss-sub-{self.getName()}-{random.randint(0, 1000)}'
@@ -61,7 +65,6 @@ class PG3User:
 class PG3WebsocketConnection:
 
     def __init__(self):
-        self.user:PG3User=None
         self.tc=None
 
     def publish(self, topic:str, msg:str):
@@ -75,10 +78,10 @@ class PG3WebsocketConnection:
         if not self._authenticate(username, password):
             return False
         try:
-            self.client = mqtt_client.Client(mqtt_client.CallbackAPIVersion.VERSION1, self.user.getClientId(), transport='websockets')
+            self.client = mqtt_client.Client(mqtt_client.CallbackAPIVersion.VERSION1, self.settings.getClientId(), transport='websockets')
             #self.client.tls_set(certfile=self.ssl.getClientCert(), keyfile=self.ssl.getClientPrivate())
             self.client.tls_set(ca_certs='/usr/local/etc/ssl/certs/ud.ca.cert', cert_reqs=ssl.VerifyMode.CERT_NONE)
-            self.client.username_pw_set(self.user.getName(), self.user.getPassword())
+            self.client.username_pw_set(self.settings.getName(), self.settings.getPassword())
             self.client.on_connect = self._on_connect
             self.client.on_message = self._on_message
             self.client.on_disconnect = self._on_disconnect
@@ -93,66 +96,10 @@ class PG3WebsocketConnection:
     def await_completion(self):
         self.tc.join()
 
-    def get_next_plugin_slot(self):
-        import re
-        # Define the directory path
-        directory = '/var/polyglot/pg3/ns'
-        # List all files in the directory
-        filenames = os.listdir(directory)
-
-        if len(filenames) == 0:
-            return 1 #first slot
-        slots=[]
-        # Print all filenames
-        for filename in filenames:
-            match = re.search(r'_(\d+)$', filename)
-            try:
-                slots.append(int(match.group(1)))
-
-            except Exception as ex:
-                IoXPluginLoggedException("invalid ns", True)
-                return -1
-
-        slot = -1
-        for slot in range(1,100):
-            if slot in slots:
-                continue
-            break;
-
-        return slot        
-
-    def _authenticate(self, username:str, password: str):
-        if username == None or password == None:
-            PLUGIN_LOGGER.error("username/password is mandatory ...")
-            return False
-
-        headers={
-            'Content-Type': 'application/json',
-            'Accept':'*/*'
-        }
-
-        body={
-            "username": username,
-            "password": password
-        }
-
-        response = requests.post(url=AUTH_URL, headers=headers, json=body, verify=False )
-        if response.status_code != 200:
-            PLUGIN_LOGGER.error(f"failed authenticating with error code = ${response.status_code}")
-            return False
-
-        data = response.json()
-        if not data['success']:
-            PLUGIN_LOGGER.error(f"pg3 returned an error ...") 
-            return False
-
-        self.user=PG3User(data['user'])
-        return True
-
     def _on_connect(self, client, userdata, flags, rc):
         if rc == 0 and client.is_connected():
-            PLUGIN_LOGGER.debug(f"Connected to MQTT Broker, subscribing to: ${self.user.getTopic()}")
-            client.subscribe(self.user.getTopic())
+            PLUGIN_LOGGER.debug(f"Connected to MQTT Broker, subscribing to: ${self.settings.getTopic()}")
+            client.subscribe(self.settings.getTopic())
         else:
             PLUGIN_LOGGER.error(f'Failed to connect, return code {rc}')
 
@@ -191,6 +138,7 @@ class PluginStoreOps:
 
     def __init__(self, store:Literal['Local', 'Production', 'Beta']):
         self.store=store
+        self.settings:PG3Settings=None
         self.plugins=[]
 
     '''
@@ -302,6 +250,115 @@ class PluginStoreOps:
         except Exception as ex:
             IoXPluginLoggedException()
             return None
+
+    def installPlugin(self, username, password):
+        '''
+            @username = pg3 username
+            @password = pg3 password
+            installs the plugin in the next available slot.
+            it uses the last store_entry.json for installation.
+            It checks the store_entry.json file to make sure this 
+            plugin was not installed before ['slot'] and ['installed']. 
+            If it was already installed, it will return -1.
+        '''
+        store_entry_file_path = os.path.join(pluginPath, STORE_ENTRY_FILE) 
+        if not os.path.exists(store_entry_file_path):
+            PLUGIN_LOGGER.error(f"store entry does not exists for this project {store_entry_file_path}. First, you need to add the plugin to the store")
+            return -1
+
+        if not self._authenticate(username, password):
+            PLUGIN_LOGGER.error(f"failed authenticating {username}")
+            return -1
+
+        try:
+            store_entry=json.load(store_entry_file_path)
+            meta=PluginMetaData(store_entry)
+
+            if meta.getInstalledSlot() != -1:
+                PLUGIN_LOGGER.error(f"{store_entry['name']} is already installed ")
+                return -1
+
+            slot = self._getNextFreeSlot()
+            if slot <= 0:
+                PLUGIN_LOGGER.error("no more free slots to install the plugin ....")
+                return -1
+    
+            PLUGIN_LOGGER.info(f"trying to install in slot {slot} ...")
+
+            installPayload={
+                "installNs":
+                {
+                    "nsid": meta.getUuid(),
+                    "thestore":self.store,
+                    "name": meta.getName(),
+                    "option":"",
+                    "edition":"Free",
+                    "uuid":self.settings.getUuid(),
+                    "profileNum":slot,
+                    "nolicense":0
+                }
+            }
+
+        except Exception as ex:
+            IoXPluginLoggedException()
+            return -1
+
+    def _authenticate(self, username:str, password: str):
+
+        headers={
+            'Content-Type': 'application/json',
+            'Accept':'*/*'
+        }
+
+        body={
+            "username": username,
+            "password": password
+        }
+
+        response = requests.post(url=AUTH_URL, headers=headers, json=body, verify=False )
+        if response.status_code != 200:
+            PLUGIN_LOGGER.error(f"failed authenticating with error code = ${response.status_code}")
+            return False
+
+        data = response.json()
+        if not data['success']:
+            PLUGIN_LOGGER.error(f"pg3 returned an error ...") 
+            return False
+
+        self.settings=PG3Settings(data['user'], data['settings'])
+        return True
+
+    def _getNextFreeSlot(self):
+        '''
+            Finds the next free slot in which a plugin can be installed
+            returns -1 if none (> 100)
+        '''
+        import re
+        # Define the directory path
+        directory = '/var/polyglot/pg3/ns'
+        # List all files in the directory
+        filenames = os.listdir(directory)
+
+        if len(filenames) == 0:
+            return 1 #first slot
+        slots=[]
+        # Print all filenames
+        for filename in filenames:
+            match = re.search(r'_(\d+)$', filename)
+            try:
+                slots.append(int(match.group(1)))
+
+            except Exception as ex:
+                IoXPluginLoggedException("invalid ns", True)
+                return -1
+
+        slot = -1
+        for slot in range(1,100):
+            if slot in slots:
+                continue
+            break;
+
+        return slot        
 
 
     def _getDevelperToken(self, emailAddress:str):

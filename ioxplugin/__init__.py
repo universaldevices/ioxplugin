@@ -16,5 +16,5 @@ from .iox_profile import ProfileWriter
 from .main_gen import PluginMain
 from .new_project import create_project as CreateNewIoXPluginProject
 from .oauth_service import OAuthService
-from .store_ops import add_plugin, PluginStoreOps, PG3WebsocketConnection
+from .store_ops import add_plugin, PluginStoreOps
 from ioxplugin import ast_util

@@ -19,13 +19,16 @@ WS_PORT = 8881
 PG_PORT = 3000
 AUTH_URL = f"https://{BROKER}:{PG_PORT}/auth"
 
-TOPIC_BASE = "udi/pg3/frontend/ns"
+
+TOPIC_BASE = "udi/pg3/frontend"
+INSTALL_TOPIC = f"{TOPIC_BASE}/isy"
+UPDATE_TOPIC = f"{TOPIC_BASE}/clients/#"
+SYSTEM_TOPIC = f"{TOPIC_BASE}/system"
 
 FIRST_RECONNECT_DELAY = 1
 RECONNECT_RATE = 2
 MAX_RECONNECT_COUNT = 12
 MAX_RECONNECT_DELAY = 60
-FLAG_EXIT = False
 
 
 DEVELOPER_TOKEN_URL_BASE="https://pg3store.isy.io/v2/developer?developer="
@@ -33,6 +36,7 @@ LOCAL_STORE_URL="https://localhost:3000/v1"
 LOCAL_STORE_URL_INSERT=f"{LOCAL_STORE_URL}/insert"
 STORE_URL_LIST=f"{LOCAL_STORE_URL}/list?store="
 STORE_ENTRY_FILE='store_entry.json'
+DEV_INIT_FILE_NAME='dev.init.sh'
 
 class PG3Settings:
 
@@ -52,8 +56,14 @@ class PG3Settings:
     def getPassword(self):
         return self.user['password']
 
-    def getTopic(self):
-        return f"{TOPIC_BASE}/{self.getName()}"
+    def getInstallTopic(self):
+        return f"{INSTALL_TOPIC}/{self.getName()}"
+
+    def getUpdateTopic(self):
+        return f"{UPDATE_TOPIC}"
+
+    def getSystemTopic(self):
+        return f"{SYSTEM_TOPIC}/{self.getName()}"
 
     def getUuid(self):
         return self.settings['macAddress']
@@ -68,11 +78,14 @@ class PluginStoreOps:
         self.store=store
         self.pluginPath=pluginPath
         self.store_entry_file_path = os.path.join(pluginPath, STORE_ENTRY_FILE) 
-        self.store_entry_file_path
+        self.dev_init_script_path = os.path.join(pluginPath, DEV_INIT_FILE_NAME) 
+        self.meta=None
         self.settings:PG3Settings=None
         self.plugins=[]
         self.client=None #mqtt client
         self.tc=None #threading client
+        self.slot=-1
+        self.completed=False
         
 
     def addToStore(self, jsonFile:str, developerEmail:str, developerUser:str):
@@ -86,17 +99,17 @@ class PluginStoreOps:
             PLUGIN_LOGGER.error(f"store entry already exists for this project {self.store_entry_file_path}. If you want to start fresh, remove this file")
             return None
         try:
-            meta=Plugin(jsonFile, self.pluginPath).meta
+            self.meta=Plugin(jsonFile, self.pluginPath).meta
 
             token = self._getDevelperToken(developerEmail)
             if token == None :
                 return None
 
-            if self._findByName(meta.getName()):
-                PLUGIN_LOGGER.error(f"A plugin with the same name already in store: {meta.getName()}")
+            if self._findByName(self.meta.getName()):
+                PLUGIN_LOGGER.error(f"A plugin with the same name already in store: {self.meta.getName()}")
                 return None
             
-            plugin_meta = meta.getStoreEntryContent()
+            plugin_meta = self.meta.getStoreEntryContent()
             if plugin_meta == None:
                 return None
             plugin_meta['developer']=developerEmail
@@ -127,10 +140,10 @@ class PluginStoreOps:
 
             new_plugin=self._findByUuid(plugin_meta['uuid'])
             if new_plugin:
-                new_plugin.save(store_entry_file_path)
+                new_plugin.save(self.store_entry_file_path)
             return new_plugin
         except Exception as ex:
-            IoXPluginLoggedException()
+            IoXPluginLoggedException("error","failed adding to store")
             return None
 
     def install(self, username, password):
@@ -143,6 +156,7 @@ class PluginStoreOps:
             plugin was not installed before ['slot'] and ['installed']. 
             If it was already installed, it will return -1.
         '''
+        self.slot = -1
         if not os.path.exists(self.store_entry_file_path):
             PLUGIN_LOGGER.error(f"store entry does not exists for this project {self.store_entry_file_path}. First, you need to add the plugin to the store")
             return -1
@@ -155,44 +169,69 @@ class PluginStoreOps:
             store_entry=None
             with open(self.store_entry_file_path, 'r') as file:
                 store_entry=json.load(file)
-            meta=PluginMetaData(store_entry)
+            self.meta=PluginMetaData(store_entry)
 
-            if meta.getInstalledSlot() != -1:
+            if self.meta.getInstalledSlot() != -1:
                 PLUGIN_LOGGER.error(f"{store_entry['name']} is already installed ")
+                self._installComplete()
                 return -1
 
-            slot = self._getNextFreeSlot()
-            if slot <= 0:
+            self.slot = self._getNextFreeSlot()
+            if self.slot <= 0:
                 PLUGIN_LOGGER.error("no more free slots to install the plugin ....")
+                self._installComplete()
                 return -1
     
-            PLUGIN_LOGGER.info(f"trying to install in slot {slot} ...")
+            PLUGIN_LOGGER.info(f"trying to install in slot {self.slot} ...")
 
             installPayload={
                 "installNs":
                 {
-                    "nsid": meta.getUuid(),
+                    "nsid": self.meta.getUuid(),
                     "thestore":self.store,
-                    "name": meta.getName(),
+                    "name": self.meta.getName(),
                     "option":"",
                     "edition":"Free",
                     "uuid":self.settings.getUuid(),
-                    "profileNum":slot,
+                    "profileNum":f"{self.slot}",
                     "nolicense":0
                 }
             }
 
-            self._publish(json.dumps(installPayload))
+            self._publish(self.settings.getInstallTopic(), json.dumps(installPayload))
+            self._awaitInstallComplete()
 
         except Exception as ex:
-            IoXPluginLoggedException()
+            IoXPluginLoggedException("error","failed installing the plugin ...")
+            self._installComplete()
             return -1
 
-    def awaitInstallComplete(self):
+    def _awaitInstallComplete(self):
         '''
             wait for the mqtt tread to complete
         '''
         self.tc.join()
+
+    def _installComplete(self):
+        self.completed = True
+        # Stop the loop and disconnect
+        self.client.loop_stop()
+        self.client.disconnect()
+
+
+    def _create_dev_init_script(self):
+        try:
+            uuid=self.settings.getUuid().replace(":","")
+            rc_script_path=f'/usr/local/etc/rc.d/{uuid}_{self.slot}'
+            with open (self.dev_init_script_path, "w") as file:
+                file.write("#!/bin/sh\n")
+                file.write("# do\n")
+                file.write("# eval `dev.init.sh`\n")
+                file.write(f"cat {rc_script_path} | grep PG3INIT\n")
+            os.chmod(self.dev_init_script_path, 0o760)
+            
+        except Exception as ex:
+            IoXPluginLoggedException("error","failed creating dev.init.sh ...")
 
 
 
@@ -228,18 +267,22 @@ class PluginStoreOps:
 
     def _on_connect(self, client, userdata, flags, rc):
         if rc == 0 and client.is_connected():
-            PLUGIN_LOGGER.debug(f"Connected to MQTT Broker, subscribing to: ${self.settings.getTopic()}")
-            client.subscribe(self.settings.getTopic())
+            PLUGIN_LOGGER.debug(f"Connected to MQTT Broker, subscribing to: ${self.settings.getUpdateTopic()}")
+            client.subscribe(self.settings.getUpdateTopic())
         else:
             PLUGIN_LOGGER.error(f'Failed to connect, return code {rc}')
 
 
     def _on_disconnect(self, client, userdata, rc):
         PLUGIN_LOGGER.info(f'Disconnected from mqtt with result code:{rc}')
+        if self.completed:
+            return
         reconnect_count, reconnect_delay = 0, FIRST_RECONNECT_DELAY
         while reconnect_count < MAX_RECONNECT_COUNT:
             PLUGIN_LOGGER.debug(f"Reconnecting in {reconnect_delay} seconds...")
             time.sleep(reconnect_delay)
+            if self.completed:
+                return
 
             try:
                 client.reconnect()
@@ -252,24 +295,50 @@ class PluginStoreOps:
             reconnect_delay = min(reconnect_delay, MAX_RECONNECT_DELAY)
             reconnect_count += 1
         PLUGIN_LOGGER.info(f"Reconnect failed after {reconnect_count} attempts. Exiting...")
-        global FLAG_EXIT
-        FLAG_EXIT = True
 
     def _on_message(self, client, userdata, msg):
-        PLUGIN_LOGGER.debug(f'Received `{msg.payload.decode()}` from `{msg.topic}` topic')
+        try:
+            payload = msg.payload.decode()
+            if "installNs" in payload:
+                PLUGIN_LOGGER.debug(f'Received `{payload}` from `{msg.topic}` topic')
+                jp = json.loads(payload)
+                pid = jp['installNs']['nsid']
+                if pid != self.meta.getUuid():
+                    return 
+                success = bool(jp['installNs']['success'])
+                if success:
+                    PLUGIN_LOGGER.info(f'successfully installed {self.meta.getName()} in {self.slot}')
+                    self.meta.setSlot(self.slot)
+                    self.meta.save(self.store_entry_file_path)
+                    installedPayload={
+                        "updateInstalled":
+                        {
+                            "nsid": pid,
+                            "installed":True
+                        }
+                    }
+                    self._publish(self.settings.getSystemTopic(), json.dumps(installedPayload))
+                    self._create_dev_init_script()
+                else:
+                    PLUGIN_LOGGER.info(f'failed installing {self.meta.getName()} in {self.slot}')
+                self._installComplete()
 
-    def _publish(self, msg:str):
+        except Exception as ex:
+            IoXPluginLoggedException("error","failed _on_message")
+            self._installComplete()
+
+    def _publish(self, topic:str, msg:str):
         if not self.client.is_connected():
             PLUGIN_LOGGER.error("cannot publish because we are not connected ...")
             return False
 
-        self.client.publish(self.settings.getTopic(), msg)
+        self.client.publish(topic, msg)
 
     def _run(self):
         try:
             self.client.loop_forever()
         except Exception as ex:
-            IoXPluginLoggedException(ex)
+            IoXPluginLoggedException("error","failed run")
 
     def _connectToStore(self, username:str, password: str):
         if not self._authenticate(username, password):
@@ -287,7 +356,7 @@ class PluginStoreOps:
             self.tc.start()
             return True
         except Exception as ex:
-            IoXPluginLoggedException("connect failed", True)
+            IoXPluginLoggedException("error","connect failed", True)
             return False
 
     def _authenticate(self, username:str, password: str):
@@ -304,7 +373,7 @@ class PluginStoreOps:
 
         response = requests.post(url=AUTH_URL, headers=headers, json=body, verify=False )
         if response.status_code != 200:
-            PLUGIN_LOGGER.error(f"failed authenticating with error code = ${response.status_code}")
+            PLUGIN_LOGGER.error(f"failed authenticating with error code = {response.status_code}")
             return False
 
         data = response.json()
@@ -333,7 +402,7 @@ class PluginStoreOps:
                 self.plugins.append(PluginMetaData(plugin))
             return self.plugins
         except Exception as ex:
-            IoXPluginLoggedException()
+            IoXPluginLoggedException("error","failed getPlugins ..")
             return None
 
 
@@ -358,7 +427,7 @@ class PluginStoreOps:
                 slots.append(int(match.group(1)))
 
             except Exception as ex:
-                IoXPluginLoggedException("invalid ns", True)
+                IoXPluginLoggedException("error","invalid ns", True)
                 return -1
 
         slot = -1
@@ -389,7 +458,7 @@ class PluginStoreOps:
 
             return content ['token']
         except Exception as ex:
-            IoXPluginLoggedException("excetpion in getting developer token ...")
+            IoXPluginLoggedException("error","excetpion in getting developer token ...")
             return None
 
 
@@ -416,8 +485,8 @@ def add_plugin():
 
     try:
         storeOps=PluginStoreOps('Local', project_path)
-        #plugin=Plugin(json_file, project_path)
-        #storeOps.addToStore(json_file, email, devUser)
+        plugin=Plugin(json_file, project_path)
+        storeOps.addToStore(json_file, email, devUser)
         storeOps.install('admin','admin')
     except Exception as ex:
         PLUGIN_LOGGER.error("Failed creating store entry ..", exc_info=True)

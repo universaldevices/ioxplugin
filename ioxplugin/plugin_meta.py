@@ -43,6 +43,9 @@ class PluginMetaData:
             PLUGIN_LOGGER.critical(str(ex))
             return None
 
+    def setSlot(self, slot):
+        self.metadata['slot']=slot
+
     def getId(self):
         try:
             return self.metadata['id']
@@ -221,7 +224,7 @@ class PluginMetaData:
             has already been installed
         '''
         try:
-            return self.metadata['installedSlot']=='1'
+            return self.metadata['slot']
         except Exception as ex:
             return -1
 

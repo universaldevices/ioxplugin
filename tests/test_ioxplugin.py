@@ -4,7 +4,7 @@
 import os
 from ioxplugin import Plugin
 from ioxplugin import PluginStoreOps
-from ioxplugin import PG3WebsocketConnection
+#from ioxplugin import PG3WebsocketConnection
 from ioxplugin import PLUGIN_LOGGER
 import time
 

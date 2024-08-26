@@ -37,7 +37,7 @@ def ioxp_log(level:Literal['debug', 'info', 'warning', 'error', 'critical'], mes
     if message == None:
         return
     try:
-        method = getattr(iox_p_logger, level)
+        method = getattr(PLUGIN_LOGGER, level)
         if method == None:
             return
         method(message, exc_info=traceback)
@@ -58,13 +58,12 @@ def p_log_error(message:str, traceback:bool=False):
 
 def p_log_critical(message:str, traceback:bool=True): ioxp_log('critical', message, traceback)
 
-class IoXPluginLoggedException(Exception):
+class IoXPluginLoggedException():
 
     '''
         Use this class to log exceptions including traceback
         log + level + include traceback.
-        level can only be debug, info, warning, error, critical
+        level can only be debug, info, warning, error, criticalsuper.__init__(message)
     '''
-    def __init__(level:Literal['debug', 'info', 'warning', 'error', 'critical'], message:str, traceback:bool=False):
-        super.__init__(message)
+    def __init__(self, level:Literal['debug', 'info', 'warning', 'error', 'critical'], message:str, traceback:bool=True):
         ioxp_log(level, message, traceback)

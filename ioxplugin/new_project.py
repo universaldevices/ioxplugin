@@ -4,10 +4,7 @@ import os
 
 
 assets=[
-    'requirements.txt',
-    'dev.init.sh',
     'install.sh',
-    'version.py',
     'tar.it',
     'POLYGLOT_CONFIG.md'
 ]

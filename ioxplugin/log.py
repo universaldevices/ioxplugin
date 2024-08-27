@@ -56,7 +56,8 @@ def p_log_warning(message:str):
 def p_log_error(message:str, traceback:bool=False):
     ioxp_log('warning', message, traceback)
 
-def p_log_critical(message:str, traceback:bool=True): ioxp_log('critical', message, traceback)
+def p_log_critical(message:str, traceback:bool=True): 
+    ioxp_log('critical', message, traceback)
 
 class IoXPluginLoggedException():
 

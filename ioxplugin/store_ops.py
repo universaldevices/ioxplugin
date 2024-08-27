@@ -24,6 +24,7 @@ TOPIC_BASE = "udi/pg3/frontend"
 INSTALL_TOPIC = f"{TOPIC_BASE}/isy"
 UPDATE_TOPIC = f"{TOPIC_BASE}/clients/#"
 SYSTEM_TOPIC = f"{TOPIC_BASE}/system"
+ADMIN_TOPIC = f"{TOPIC_BASE}/ns"
 
 FIRST_RECONNECT_DELAY = 1
 RECONNECT_RATE = 2
@@ -64,6 +65,9 @@ class PG3Settings:
 
     def getSystemTopic(self):
         return f"{SYSTEM_TOPIC}/{self.getName()}"
+
+    def getAdminTopic(self):
+        return f"{ADMIN_TOPIC}/{self.getName()}"
 
     def getUuid(self):
         return self.settings['macAddress']
@@ -146,6 +150,7 @@ class PluginStoreOps:
             IoXPluginLoggedException("error","failed adding to store")
             return None
 
+    
     def install(self, username, password):
         '''
             @username = pg3 username
@@ -215,9 +220,53 @@ class PluginStoreOps:
     def _installComplete(self):
         self.completed = True
         # Stop the loop and disconnect
+        self._stopPlugin()
         self.client.loop_stop()
         self.client.disconnect()
 
+    def _processCommand(self, command:str):
+
+        '''
+            Send a command to the plugin
+        '''
+        if not os.path.exists(self.store_entry_file_path):
+            PLUGIN_LOGGER.error(f"store entry does not exists for this project {self.store_entry_file_path} so cannot run {command} command ")
+            return -1
+        
+        try:
+            store_entry=None
+            with open(self.store_entry_file_path, 'r') as file:
+                store_entry=json.load(file)
+            self.meta=PluginMetaData(store_entry)
+
+            self.slot = self.meta.getInstalledSlot() 
+            if self.slot == -1:
+                PLUGIN_LOGGER.error(f"{store_entry['name']} is not installed so cannot run {command} command ...")
+                return -1
+
+            uuid=self.settings.getUuid().replace(":","")
+            service_name = f"{uuid}_{self.slot}"
+            PLUGIN_LOGGER.info(f"trying to run command {command} for {service_name}...")
+
+            installPayload={
+                f"{command}":
+                {
+                    "uuid": self.settings.getUuid(),
+                    "profileNum":self.slot,
+                }
+            }
+
+            self._publish(self.settings.getAdminTopic(), json.dumps(installPayload))
+
+        except Exception as ex:
+            IoXPluginLoggedException("error", f"failed running command {command}...")
+            return -1
+
+    def _startPlugin(self):
+        return self._processCommand("startNS")
+
+    def _stopPlugin(self):
+        return self._processCommand("stopNS")
 
     def _create_dev_init_script(self):
         try:
@@ -464,7 +513,6 @@ class PluginStoreOps:
 
 def add_plugin():
     project_path = "/usr/home/admin/workspace/ioxplugin/tests"
-    init_ext_logging(project_path)
     json_file = f"{project_path}/dimmer.iox_plugin.json"
     email = "tech@universal-devices.com"
     devUser = "admin"
@@ -479,13 +527,13 @@ def add_plugin():
         args = parser.parse_args()
 
         project_path = args.project_path
-        json_file = args.json_file
+        json_file = f"{project_path}/{args.json_file}"
+        init_ext_logging(project_path)
     except SystemExit as ex:
         pass
 
     try:
         storeOps=PluginStoreOps('Local', project_path)
-        plugin=Plugin(json_file, project_path)
         storeOps.addToStore(json_file, email, devUser)
         storeOps.install('admin','admin')
     except Exception as ex:

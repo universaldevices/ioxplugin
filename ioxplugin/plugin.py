@@ -37,7 +37,6 @@ class Plugin:
     def __init__(self, plugin_file, path:str=None, schema=PLUGIN_SCHEMA_FILE):
         self.path = os.path.dirname(plugin_file) if path == None else path
         self.path = './' if self.path == '' else self.path
-        init_ext_logging(self.path)
         self.meta = None
         self.editors=Editors()
         self.nodedefs:NodeDefs = None

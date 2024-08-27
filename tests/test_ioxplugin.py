@@ -10,11 +10,6 @@ import time
 
 
 curdir = os.curdir
-pg3wss= PG3WebsocketConnection()
-if not pg3wss.connect('admin','admin'):
-    PLUGIN_LOGGER.error('login failed')
-    exit(1)
-PLUGIN_LOGGER.debug('connected ..')
 #pg3wss.await_completion()
 time.sleep(20000)
 

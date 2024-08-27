@@ -134,14 +134,14 @@ class PluginMetaData:
         try:
             return (self.metadata['status']).lower()
         except Exception as ex:
-            PLUGIN_LOGGER.critical(str(ex))
+            PLUGIN_LOGGER.info("status not found in meta ...")
             return None
 
     def getEnableFileUpload(self):
         try:
             return bool(self.metadata['enableFileUpload'])
         except Exception as ex:
-            PLUGIN_LOGGER.critical(str(ex))
+            PLUGIN_LOGGER.info('enableFileUpload not found in meta ...')
             return False
 
     def getEnableOAUTH2(self):

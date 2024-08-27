@@ -1,4 +1,5 @@
 import os
+from ioxplugin import PLUGIN_LOGGER
 
 '''
 This class creates an implemenation class for the Node class

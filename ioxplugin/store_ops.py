@@ -11,6 +11,7 @@ import random
 import json
 import threading
 import ssl
+import time
 from paho.mqtt import client as mqtt_client
 
 
@@ -25,6 +26,8 @@ INSTALL_TOPIC = f"{TOPIC_BASE}/isy"
 UPDATE_TOPIC = f"{TOPIC_BASE}/clients/#"
 SYSTEM_TOPIC = f"{TOPIC_BASE}/system"
 ADMIN_TOPIC = f"{TOPIC_BASE}/ns"
+PLUGIN_TOPIC_BASE = "udi/pg3/ns/clients"
+PLUGIN_CONNECTION_TOPIC_BASE = "connections/ns"
 
 FIRST_RECONNECT_DELAY = 1
 RECONNECT_RATE = 2
@@ -69,8 +72,15 @@ class PG3Settings:
     def getAdminTopic(self):
         return f"{ADMIN_TOPIC}/{self.getName()}"
 
+    def getPluginTopic(self, slot):
+        return f"{PLUGIN_TOPIC_BASE}/{self.getUuid()}_{slot}"
+
+    def getPluginConnectionTopic(self, slot):
+        return f"{PLUGIN_CONNECTION_TOPIC_BASE}/{self.getUuid()},{slot}"
+
     def getUuid(self):
         return self.settings['macAddress']
+
 
     def getClientId(self):
         # generate client ID with pub prefix randomly
@@ -90,6 +100,7 @@ class PluginStoreOps:
         self.tc=None #threading client
         self.slot=-1
         self.completed=False
+        self.got_installed_message=False
         
 
     def addToStore(self, jsonFile:str, developerEmail:str, developerUser:str):
@@ -217,12 +228,22 @@ class PluginStoreOps:
         '''
         self.tc.join()
 
-    def _installComplete(self):
-        self.completed = True
+    def _installCompleteThread(self):
         # Stop the loop and disconnect
+        counter = 0
+        time.sleep(2)
         self._stopPlugin()
+        time.sleep(2)
         self.client.loop_stop()
         self.client.disconnect()
+
+
+    def _installComplete(self):
+        if self.completed:
+            return
+        self.completed=True
+        threading.Thread(target=self._installCompleteThread, name="install-complete-thread").start()
+
 
     def _processCommand(self, command:str):
 
@@ -263,10 +284,10 @@ class PluginStoreOps:
             return -1
 
     def _startPlugin(self):
-        return self._processCommand("startNS")
+        return self._processCommand("startNs")
 
     def _stopPlugin(self):
-        return self._processCommand("stopNS")
+        return self._processCommand("stopNs")
 
     def _create_dev_init_script(self):
         try:
@@ -348,8 +369,10 @@ class PluginStoreOps:
     def _on_message(self, client, userdata, msg):
         try:
             payload = msg.payload.decode()
+            topic = msg.topic
+            PLUGIN_LOGGER.debug(f'Received `{payload}` from `{topic}` topic')
             if "installNs" in payload:
-                PLUGIN_LOGGER.debug(f'Received `{payload}` from `{msg.topic}` topic')
+                self.got_installed_message=True
                 jp = json.loads(payload)
                 pid = jp['installNs']['nsid']
                 if pid != self.meta.getUuid():
@@ -528,11 +551,14 @@ def add_plugin():
 
         project_path = args.project_path
         json_file = f"{project_path}/{args.json_file}"
-        init_ext_logging(project_path)
     except SystemExit as ex:
         pass
 
+    init_ext_logging(project_path)
     try:
+        mod=Plugin(json_file, project_path)
+        mod.toIoX()
+        mod.generateCode(project_path)
         storeOps=PluginStoreOps('Local', project_path)
         storeOps.addToStore(json_file, email, devUser)
         storeOps.install('admin','admin')

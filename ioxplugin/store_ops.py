@@ -41,6 +41,8 @@ LOCAL_STORE_URL_INSERT=f"{LOCAL_STORE_URL}/insert"
 STORE_URL_LIST=f"{LOCAL_STORE_URL}/list?store="
 STORE_ENTRY_FILE='store_entry.json'
 DEV_INIT_FILE_NAME='dev.init.sh'
+PLUGIN_ENV_FILE_NAME='.iox_env'
+
 
 class PG3Settings:
 
@@ -86,13 +88,111 @@ class PG3Settings:
         # generate client ID with pub prefix randomly
         return f'ioxplugin-wss-sub-{self.getName()}-{random.randint(0, 1000)}'
 
+
+class PluginLaunchOps:
+    def __init__(self, pluginPath:str):
+        self.dev_init_script_path = os.path.join(pluginPath, DEV_INIT_FILE_NAME) 
+        self.plugin_env_file = os.path.join(pluginPath, PLUGIN_ENV_FILE_NAME) 
+        self.plugin_launch_path = os.path.join(pluginPath, '.vscode') 
+        self.plugin_launch_file = os.path.join(self.plugin_launch_path, 'launch.json') 
+
+    def create_dev_init(self, uuid:str, slot):
+        try:
+            rc_script_path=f'/usr/local/etc/rc.d/{uuid}_{slot}'
+            with open (self.dev_init_script_path, "w") as file:
+                file.write("#!/bin/sh\n")
+                file.write("# do\n")
+                file.write("# eval `dev.init.sh`\n")
+                file.write(f"cat {rc_script_path} | grep PG3INIT\n")
+            os.chmod(self.dev_init_script_path, 0o760)
+
+            
+        except Exception as ex:
+            IoXPluginLoggedException("error","failed creating dev.init.sh ...")
+
+    def create_launch_json(self, name:str, executable:str):
+        header = {
+            "version": "0.2.0",
+            "configurations": [
+            ]
+        }
+        template = {
+                    "name": name ,
+                    "type": "debugpy",
+                    "request": "launch",
+                    "program": executable,  
+                    "console": "integratedTerminal",
+                    "envFile": self.plugin_env_file, 
+                    "justMyCode": False
+                }
+
+        try:
+            if not self._create_launch_json_env():
+                return False
+            launch_json= None
+            
+            if not os.path.exists(self.plugin_launch_file):
+                with open(self.plugin_launch_file, 'w') as file:
+                    file.write(json.dumps(header, indent=4))
+                launch_json=header
+            else:
+                with open(self.plugin_launch_file, 'r') as file:
+                    launch_json=json.loads(file.read())
+
+            found = False
+            configurations=launch_json['configurations']
+            for i, element in enumerate(configurations):
+                if element.get("name") == name:
+                    configurations[i] = template  # Replace everything 
+                    found = True
+                    break
+
+            if not found:
+                configurations.append(template)
+
+            with open(self.plugin_launch_file, 'w') as file:
+                file.write(json.dumps(launch_json, indent=4))
+
+        except Exception as ex:
+            IoXPluginLoggedException("warning","saving the launch.json template as is...")
+
+    def _create_launch_json_env(self):
+        import subprocess
+        try:
+            #create a directory
+            os.makedirs(self.plugin_launch_path, exist_ok=True)
+
+            # Step 1: Run `dev.init.sh`
+            dev = subprocess.Popen([self.dev_init_script_path], stdout=subprocess.PIPE)
+
+            # Step 2: Pipe to awk 
+            awk = subprocess.Popen(['awk', '{print $2;}'], stdin=dev.stdout, stdout=subprocess.PIPE)
+
+            
+            output, error = awk.communicate()
+            dev.stdout.close()
+            awk.stdout.close()
+
+            if not error:
+                #cp to env file
+                with open(self.plugin_env_file, 'w') as file:
+                    file.write(output.decode('utf-8'))
+                return True
+            else:
+                PLUGIN_LOGGER.error('failed creating iox.env ...', exc_info=True)
+                return False
+            
+        except Exception as ex:
+            IoXPluginLoggedException("error","failed creating dev.init.sh ...")
+            raise
+
+
 class PluginStoreOps:
 
     def __init__(self, store:Literal['Local', 'Production', 'Beta'], pluginPath:str):
         self.store=store
         self.pluginPath=pluginPath
         self.store_entry_file_path = os.path.join(pluginPath, STORE_ENTRY_FILE) 
-        self.dev_init_script_path = os.path.join(pluginPath, DEV_INIT_FILE_NAME) 
         self.meta=None
         self.settings:PG3Settings=None
         self.plugins=[]
@@ -292,14 +392,9 @@ class PluginStoreOps:
     def _create_dev_init_script(self):
         try:
             uuid=self.settings.getUuid().replace(":","")
-            rc_script_path=f'/usr/local/etc/rc.d/{uuid}_{self.slot}'
-            with open (self.dev_init_script_path, "w") as file:
-                file.write("#!/bin/sh\n")
-                file.write("# do\n")
-                file.write("# eval `dev.init.sh`\n")
-                file.write(f"cat {rc_script_path} | grep PG3INIT\n")
-            os.chmod(self.dev_init_script_path, 0o760)
-            
+            lops = PluginLaunchOps(self.pluginPath)
+            lops.create_dev_init(uuid, self.slot)
+            lops.create_launch_json(self.meta.getName(), self.meta.getLaunchFile())
         except Exception as ex:
             IoXPluginLoggedException("error","failed creating dev.init.sh ...")
 

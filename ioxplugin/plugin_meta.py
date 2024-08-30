@@ -81,6 +81,13 @@ class PluginMetaData:
             PLUGIN_LOGGER.critical(str(ex))
             return None
 
+    def getLaunchFile(self):
+        try:
+            return self.metadata['executable']
+        except Exception as ex:
+            PLUGIN_LOGGER.critical(str(ex))
+            return None
+
     def getInstallScript(self):
         try:
             return self.metadata['installScript']

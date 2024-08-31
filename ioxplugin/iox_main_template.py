@@ -45,7 +45,7 @@ if __name__ == '__main__':
             protocolHandler = __PROTOCOL_HANDLER_CLASS__(plugin)
             controller = __CONTROLLER_NODE_CLASS__(polyglot, protocolHandler)
             protocolHandler.setController(controller)
-            controller.start()
+            polyglot.ready()
             polyglot.runForever()
     
     except (KeyboardInterrupt, SystemExit):

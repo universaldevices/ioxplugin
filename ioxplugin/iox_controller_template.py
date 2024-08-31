@@ -16,6 +16,7 @@ CONTROLLER_TEMPLATE_BODY='''
     def initOAuth(self):
         if self.protocolHandler and self.protocolHandler.plugin and self.protocolHandler.plugin.meta and self.protocolHandler.plugin.meta.getEnableOAUTH2():
             self.oauthService = OAuthService(self.polyglot)
+            self.poly.subscribe(polyglot.OAUTH, self.oauthHandler)
 
     def parameterHandler(self, params):
         self.Parameters.load(params)
@@ -46,25 +47,24 @@ CONTROLLER_TEMPLATE_BODY='''
     def start(self):
         LOGGER.info(f'Starting... ')
         try:
-            self.poly.addNode(self)
             self.poly.setCustomParamsDoc()
-            self.poly.ready()
-            with self.configDone:
-                result = self.configDone.wait(timeout=10)
-                if not result:
-                    #timedout
-                    LOGGER.info("timed out while waiting for configDone")
-                    self.updateStatus(0, True) 
-                    return False
-                if self.protocolHandler.start():
-                    self.addAllNodes()
-                    self.poly.updateProfile()
-                    self.updateStatus(1, True) 
-                    return True
-                else:
-                    LOGGER.info("protocol handler failed processing config ...")
-                    self.updateStatus(0, True) 
-                    return False
+            if not self.configDoneAlready:
+                with self.configDone:
+                    result = self.configDone.wait(timeout=10)
+                    if not result:
+                        #timedout
+                        LOGGER.info("timed out while waiting for configDone")
+                        self.updateStatus(0, True) 
+                        return False
+            if self.protocolHandler.start():
+                self.addAllNodes()
+                self.poly.updateProfile()
+                self.updateStatus(1, True) 
+                return True
+            else:
+                LOGGER.info("protocol handler failed processing config ...")
+                self.updateStatus(0, True) 
+                return False
         except Exception as ex:
             LOGGER.error(str(ex))
             return False
@@ -76,6 +76,8 @@ CONTROLLER_TEMPLATE_BODY='''
         return True
 
     def poll(self, polltype):
+        if not self.configDoneAlready:
+            return
         if 'shortPoll' in polltype:
             self.protocolHandler.shortPoll()
         elif 'longPoll' in polltype:
@@ -103,7 +105,7 @@ CONTROLLER_TEMPLATE_BODY='''
             if not self.__addNode(node):
                 return
         LOGGER.info(f'Done adding nodes ...')
-
+ 
     def __getNodeClass(self, nodeDefId:str)->str:
         for child in self.children:
             if child['id'] == nodeDefId:
@@ -160,6 +162,7 @@ CONTROLLER_TEMPLATE_BODY='''
                 polyglot.Notices['auth'] = 'Please initiate authentication using the Authenticate Buttion'
                 return False
         with self.configDone:
+            self.configDoneAlready = True
             self.configDone.notifyAll()
         return rc
 

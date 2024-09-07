@@ -16,3 +16,5 @@ tests/__pycache__/*
 ioxplugin.egg-info/
 ioxplugin.egg-info/*
 store_entry.json
+.venv/
+.venv/*

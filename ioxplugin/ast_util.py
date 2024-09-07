@@ -290,7 +290,11 @@ def astInitBodyController():
                 ctx=ast.Load()
             ),
             args=[ast.Name(id='self', ctx=ast.Load())],
-            keywords=[]
+            keywords=[ 
+                ast.keyword(
+                    arg='conn_status',
+                    value=ast.Constant(value='ST')
+                )]
         )),
         #Setting oauthService 
         ast.Assign(

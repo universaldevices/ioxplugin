@@ -159,6 +159,73 @@ class IoXNodeGen():
         #create update and get methods
         query_commands=[]
 
+        get_uom = ast.FunctionDef(
+            name='getUOM',
+            args=ast.arguments(
+                args=[
+                    ast.arg(arg='self', annotation=None),
+                    ast.arg(arg='driver', annotation=ast.Name(id='str', ctx=ast.Load()))
+                ],
+                vararg=None,
+                kwonlyargs=[],
+                kw_defaults=[],
+                kwarg=None,
+                defaults=[]
+            ),
+            body=[
+                ast.Try(
+                    body=[
+                        ast.For(
+                            target=ast.Name(id='driver_def', ctx=ast.Store()),
+                            iter=ast.Attribute(
+                                value=ast.Name(id='self', ctx=ast.Load()),
+                                attr='drivers',
+                                ctx=ast.Load()
+                            ),
+                            body=[
+                                ast.If(
+                                    test=ast.Compare(
+                                        left=ast.Subscript(
+                                            value=ast.Name(id='driver_def', ctx=ast.Load()),
+                                            slice=ast.Index(value=ast.Str(s='driver')),
+                                            ctx=ast.Load()
+                                        ),
+                                        ops=[ast.Eq()],
+                                        comparators=[ast.Name(id='driver', ctx=ast.Load())]
+                                    ),
+                                    body=[
+                                        ast.Return(
+                                            value=ast.Subscript(
+                                                value=ast.Name(id='driver_def', ctx=ast.Load()),
+                                                slice=ast.Index(value=ast.Str(s='uom')),
+                                                ctx=ast.Load()
+                                            )
+                                        )
+                                    ],
+                                    orelse=[]
+                                )
+                            ],
+                            orelse=[]
+                        ),
+                        ast.Return(value=ast.NameConstant(value=None))
+                    ],
+                    handlers=[
+                        ast.ExceptHandler(
+                            type=ast.Name(id='Exception', ctx=ast.Load()),
+                            name='ex',
+                            body=[ast.Return(value=ast.NameConstant(value=None))]
+                        )
+                    ],
+                    orelse=[],
+                    finalbody=[]
+                )
+            ],
+            decorator_list=[],
+            returns=None
+        )
+
+
+        class_def.body.append(get_uom)
 
         for driver in drivers:
             set_driver_call=ast.Call(
@@ -185,6 +252,7 @@ class IoXNodeGen():
                 kwonlyargs=[], kw_defaults=[], vararg=None, kwarg=None
             ),
             body=[
+               # ast_util.astComment(f"Use this method to update {getValidName(driver['name'])} in IoX"),
                 return_stmt
             ],
             keywords=[],
@@ -192,7 +260,6 @@ class IoXNodeGen():
             )
 
             if not self.nodedef.isController:
-                class_def.body.append(ast_util.astComment(f"Use this method to update {getValidName(driver['name'])} in IoX"))
                 class_def.body.append(method)
 
             ## Now getDriver

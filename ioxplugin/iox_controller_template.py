@@ -224,6 +224,6 @@ CONTROLLER_TEMPLATE_BODY='''
     ###
     # This is a list of commands that were defined in the nodedef
     ###
-    commands = {'Discover': discover, 'Query': query}
+    commands = {'discover': discover, 'x_query': query}
 
 '''

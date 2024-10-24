@@ -148,6 +148,9 @@ class Plugin:
 
     def areNodesStatic(self):
         return self.meta.areNodesStatic()
+
+    def getEnableDiscovery(self):
+        return self.meta.getEnableDiscovery()
     
     def getPythonPHClassName(self):
         return self.meta.getPythonPHClassName()

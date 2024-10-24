@@ -179,6 +179,13 @@ class PluginMetaData:
             PLUGIN_LOGGER.critical(str(ex))
             return False
 
+    def getEnableDiscovery(self):
+        try:
+            return bool(self.metadata['enableDiscovery'])
+        except Exception as ex:
+            PLUGIN_LOGGER.critical(str(ex))
+            return False
+
     def getRequirements(self):
         out = DEFAULT_REQ_PKGS
         try:
@@ -303,6 +310,7 @@ class PluginMetaData:
             "eisy":'true' if self.getWorksOnEisy() else 'false',
             "isyAccess":'true' if self.getRequiresIoXAccess() else 'false',
             "fileUpload":'true' if self.getEnableFileUpload() else 'false', 
+            "enableDiscovery":'true' if self.getEnableDiscovery() else 'false', 
             "docs":docs,
             "license":lic,
             "desc":desc

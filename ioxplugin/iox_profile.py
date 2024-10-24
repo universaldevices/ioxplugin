@@ -5,7 +5,7 @@
 Manage profiles (editor, nls, and nodedef)
 Copyright (C) 2024 Universal Devices
 """
-from .log import PLUGIN_LOGGER
+from .log import PLUGIN_LOGGER, IoXPluginLoggedException
 import os
 
 NLS_PATH="nls"
@@ -28,12 +28,13 @@ class ProfileWriter:
             self.editor_file=f"{self.editor_path}/{EDITOR_FILE}"
             self.nodedef_file=f"{self.nodedef_path}/{NODEDEF_FILE}"
 
-            self.__preferfs(is_new)  
+            self.__preparefs(is_new)  
 
         except Exception as ex:
-            PLUGIN_LOGGER.critical(str(ex))
+            IoXPluginLoggedException("debug", "init error")
+            #PLUGIN_LOGGER.critical(str(ex))
 
-    def __preferfs(self, is_new:bool):
+    def __preparefs(self, is_new:bool):
         if not os.path.exists(self.path):
             os.makedirs(self.path)
         

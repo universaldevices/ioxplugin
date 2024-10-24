@@ -140,9 +140,13 @@ class NodeDefs:
                     "name": "Status",
                     "editor": {
                         "id":"CTL_BOOL",
-                        "uom": "Boolean | 2",
+                        "uom": "Index | 25",
                         "min": 0,
-                        "max": 1
+                        "max": 1,
+                        "index_names": [
+                            "Disconnected | 0",
+                            "Connected | 1",
+                        ]
                     } ,
                     "is_settable": False
                 }
@@ -151,11 +155,11 @@ class NodeDefs:
                 "accepts": [
                     {
                         "id": "discover",
-                        "name": "discover"
+                        "name": "Discover"
                     },
                     {
                         "id": "query",
-                        "name": "query"
+                        "name": "Query"
                     }
                 ],
                 "sends": []

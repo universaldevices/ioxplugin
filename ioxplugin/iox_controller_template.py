@@ -28,7 +28,7 @@ CONTROLLER_TEMPLATE_BODY='''
                 self.protocolHandler.filesUploaded(DATA_PATH)
                 shutil.rmtree(DATA_PATH)
             if param:
-                return self.protocolHandler.configChanged(param)
+                return self.protocolHandler.processConfig(param)
         except Exception as ex:
             LOGGER.warn(str(ex))
 

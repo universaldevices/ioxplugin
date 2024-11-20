@@ -407,7 +407,7 @@ def astInitBodyController():
                     ctx=ast.Store()
                 )
             ],
-            value=ast.Constant(value=True),
+            value=ast.Constant(value=False),
             type_comment=None
         )
     ]   

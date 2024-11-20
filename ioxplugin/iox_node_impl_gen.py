@@ -321,22 +321,22 @@ class __PROTOCOL_HANDLER_CLASS__:
     # The address is the address of the node.
     ###
     def getNode(self, address:str):
-        return self.controller.poly.getNode()
+        return self.controller.poly.getNode(address)
 
     ###
     # Call this method to update a property for a node.
     # The plugin already creates an implementation for you such that you can 
     # call something like updateHeatSetpoint(). This said, however, for dynamically
-    # generated code/classes, you might not actually know the method naems. In those
+    # generated code/classes, you might not actually know the method names. In those
     # cases, you can use this method instead.
     # You can use the text just as an arbitrary/freeform text that is displayed as is
     # in the clients without any processing.
     ###
-    def updateProperty(node_addr:str, property_id:str, value, force:bool, text:str=None):
+    def updateProperty(self, node_addr:str, property_id:str, value, force:bool, text:str=None):
         try:
             node = self.getNode(node_addr)
             if node == None:
-                LOGGER.error(f"Set property failed for {node_address}")
+                LOGGER.error(f"Update property failed for {node_address}")
                 return False
             return node.setDriver(property_id, value, force=force, text=text)
         except Exception as ex:

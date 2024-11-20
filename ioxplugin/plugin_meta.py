@@ -304,6 +304,8 @@ class PluginMetaData:
             "executable":self.getExecutableName(),
             "status":status,
             "shortPoll":shortPoll,
+            "longPoll":longPoll,
+            "nsInfoPoll":60,
             "logLevel":self.getInitialLogLevel(),
             "authorize":'true' if self.getEnableOAUTH2() else 'false',
             "polisy":'true' if self.getWorksOnPolisy() else 'false',

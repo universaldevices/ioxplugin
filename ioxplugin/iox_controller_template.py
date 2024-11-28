@@ -105,6 +105,21 @@ CONTROLLER_TEMPLATE_BODY='''
             if not self.__addNode(node):
                 return
         LOGGER.info(f'Done adding nodes ...')
+    
+    def addNode(self, address:str, nodeDefId:str, name:str, parent:str=None):
+        if address == None or nodeDefId == None:
+            LOGGER.error("need address and nodeDefId ...")
+            return False
+
+        if parent == None:
+            parent = address  
+
+        nodeInfo={}
+        nodeInfo['primaryNode']=parent
+        nodeInfo['address']=address
+        nodeInfo['name']=name
+        nodeInfo['nodeDefId']=nodeDefId
+        return self.__addNode(nodeInfo)
  
     def __getNodeClass(self, nodeDefId:str)->str:
         for child in self.children:

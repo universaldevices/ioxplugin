@@ -89,10 +89,19 @@ class __PROTOCOL_HANDLER_CLASS__:
             LOGGER.error(str(ex))
             return False
 
+    ###
+    #Call this method to create dynamic node. The parent will always be the controller 
+    #for this node
+    ###
+    def addNode(self, address:str, nodeDefId:str, name:str ):
+        try:
+            return self.controller.addNode(address, nodeDefId, name, self.controller.id)
+        except Exception as ex:
+            LOGGER.error(str(ex))
+            return False
+
     ####
-    # MANDATORY 
-    # This method is called in order to get a unique address for your newly created node
-    # for the given nodedef_id
+    # This method is called in case a node is created without an address 
     ####
     def getNodeAddress(self, nodedef_id):
         try:

@@ -1,8 +1,9 @@
 from setuptools import setup, find_packages
+from version import ud_plugin_version 
 
 setup(
     name='ioxplugin',
-    version='1.4.0',
+    version=ud_plugin_version,
     packages=find_packages(),
     description='IoX Plugin Helper Package',
     long_description=open('README.md').read(),
@@ -12,7 +13,8 @@ setup(
     url='https://github.com/universaldevices/ioxplugin.git',
     install_requires=[
         'udi_interface>=3.0.57',  # Specify version ranges if needed
-        'astor'
+        'astor',
+        'fastjsonschema'
     ],
     classifiers=[
         "Programming Language :: Python :: 3",

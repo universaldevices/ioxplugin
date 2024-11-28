@@ -234,7 +234,7 @@ class PluginStoreOps:
             plugin_meta['store']='Local'
             plugin_meta['from_store']='Local'
             plugin_meta['prem']=True
-            plugin_meta['purchaseOpetions']=[]
+            plugin_meta['purchaseOptions']=[]
             plugin_meta['token']=token
 
             post_content:str = urllib.parse.urlencode(plugin_meta)

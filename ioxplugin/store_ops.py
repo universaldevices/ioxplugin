@@ -3,6 +3,7 @@
 ###
 
 from ioxplugin import PLUGIN_LOGGER, IoXPluginLoggedException, Plugin, PluginMetaData, init_ext_logging
+from importlib.resources import path as resource_path
 import requests
 import urllib.parse
 import argparse, os
@@ -157,6 +158,26 @@ class PluginLaunchOps:
             IoXPluginLoggedException("warning","saving the launch.json template as is...")
 
     def _create_launch_json_env(self):
+        import subprocess
+        try: 
+            with resource_path("ioxplugin", "create_launch_env.sh") as script_path:
+                os.chmod(script_path, 0o755)
+                result = subprocess.run(
+                    [script_path, self.dev_init_script_path, self.plugin_env_file],
+                    capture_output=True,
+                    text=True
+                )
+            if result.returncode != 0:
+                raise RuntimeError(f"create_launch_evn.sh failed with return code {result.returncode}")
+                return False
+            return True
+        except Exception as ex:
+            IoXPluginLoggedException("error","failed creating dev.init.sh ...")
+            return False
+
+
+
+    def _create_launch_json_env__OLD(self):
         import subprocess
         try:
             #create a directory

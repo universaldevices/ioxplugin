@@ -41,17 +41,27 @@ class ProfileWriter:
         if not os.path.exists(self.nls_path):
             os.makedirs(self.nls_path)
         elif is_new:
-            os.remove(self.nls_file)
+            try:
+                os.remove(self.nls_file)
+            except:
+                pass
 
         if not os.path.exists(self.editor_path):
             os.makedirs(self.editor_path)
         elif is_new:
-            os.remove(self.editor_file)
+            try:
+                os.remove(self.editor_file)
+            except:
+                pass
 
         if not os.path.exists(self.nodedef_path):
             os.makedirs(self.nodedef_path)
         elif is_new:
-            os.remove(self.nodedef_file)
+            try:
+                os.remove(self.nodedef_file)
+            except:
+                pass
+
 
     def writeToNLS(self,nls:str)->bool:
         try:

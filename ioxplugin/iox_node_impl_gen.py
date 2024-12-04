@@ -287,7 +287,6 @@ class __PROTOCOL_HANDLER_CLASS__:
         except Exception as ex:
             LOGGER.error(f'failed updating custom param ...' )
 
-
     ####
     # This method is called when a custom value (key/value) pair that's stored in the 
     # database is changed. You can use this method to manage custom parameters of your own

@@ -159,6 +159,8 @@ class PluginLaunchOps:
 
     def _create_launch_json_env(self):
         import subprocess
+        #create a directory
+        os.makedirs(self.plugin_launch_path, exist_ok=True)
         try: 
             with resource_path("ioxplugin", "create_launch_env.sh") as script_path:
                 os.chmod(script_path, 0o755)

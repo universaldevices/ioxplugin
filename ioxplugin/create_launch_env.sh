@@ -17,4 +17,4 @@ fi
 
 val=$($1)
 
-echo "$val" | cut -d' ' -f2 
+echo "$val" | cut -d' ' -f2 > $2 

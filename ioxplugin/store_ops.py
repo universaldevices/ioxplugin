@@ -168,7 +168,7 @@ class PluginLaunchOps:
                     text=True
                 )
             if result.returncode != 0:
-                raise RuntimeError(f"create_launch_evn.sh failed with return code {result.returncode}")
+                raise RuntimeError(f"create_launch_env.sh failed with return code {result.returncode}")
                 return False
             return True
         except Exception as ex:

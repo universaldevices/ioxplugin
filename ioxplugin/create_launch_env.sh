@@ -17,4 +17,4 @@ fi
 
 val=$($1)
 
-echo "$val" | awk '{print $2}' > $2
+echo "$val" | cut -d' ' -f2 

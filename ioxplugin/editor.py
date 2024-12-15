@@ -22,6 +22,8 @@ class EditorDetails:
         self.subset=None
         self.index_names=[]
         self.idref=None
+        self.extendedEditors=[]
+        self.isExtended=False
         if editor == None:
             PLUGIN_LOGGER.critical("no editor given for EditorDetails ...")
             raise
@@ -52,6 +54,16 @@ class EditorDetails:
             PLUGIN_LOGGER.critical(str(ex))
             raise
 
+    def addExtendedEditor(self,editor):
+        if editor:
+            for ed in self.extendedEditors:
+                if ed.uom == editor.uom:
+                    PLUGIN_LOGGER.critical("although you can have multiple ranges, each must have a different uom ...")
+                    raise ValueError("although you can have multiple ranges, each must have a different uom ...")
+
+            self.extendedEditors.append(editor)
+            editor.isExtended=True
+
 
     #returns editors + nls  
     def toIoX(self)->(str, str):
@@ -59,7 +71,11 @@ class EditorDetails:
             PLUGIN_LOGGER.warn("editor without an id ... ")
             return None, None
         nls = ""
-        editor = f"<editor id=\"{self.id}\">\n<range uom=\"{self.uom}\" "
+        editor=""
+        if self.isExtended:
+            editor = f"<range uom=\"{self.uom}\" "
+        else:
+            editor = f"<editor id=\"{self.id}\">\n<range uom=\"{self.uom}\" "
         if self.isSubset():
             editor += (f"subset=\"{self.subset}\"")
         else:
@@ -77,8 +93,16 @@ class EditorDetails:
                     val = self.index_names[i] 
                     parsed_list = [item.strip() for item in val.split('|')]
                     nls += f"\nNLSIX_{self.id}-{parsed_list[1]} = {parsed_list[0]}"
-
-        editor += ("/>\n</editor>\n")
+            editor+=("/>\n") #end of range
+        if len (self.extendedEditors) > 0:
+            for exed in self.extendedEditors:
+                e,n = exed.toIoX()
+                if e:
+                    editor+= e
+                if n:
+                    nls+=n
+        if not self.isExtended:
+            editor += ("</editor>\n")
         return editor, nls
 
     def validate(self):
@@ -123,7 +147,12 @@ class Editors:
             if ed.isRef() :
                 self.refs.append(ed.idref)
             else:
-                self.editors[ed.id]=ed
+                if ed.id in self.editors:
+                    #additional editors
+                    origEditor = self.editors[ed.id]
+                    origEditor.addExtendedEditor(ed)
+                else:
+                    self.editors[ed.id]=ed
             return ed
         except Exception as ex:
             raise

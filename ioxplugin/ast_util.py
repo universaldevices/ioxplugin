@@ -193,25 +193,45 @@ def astCommandQueryParams(command):
 def astCommandParamAssignment(param_uom, val_name, toInt=True):
     # Assignment: val = int(jparam['WCTRL.uom78'])
     if toInt:
-        return ast.Assign(
-        targets=[ast.Name(id=val_name, ctx=ast.Store())],
-        value=ast.Call(
-            func=ast.Name(id='int', ctx=ast.Load()),
-            args=[ast.Subscript(
-                value=ast.Name(id='jparam', ctx=ast.Load()),
-                slice=ast.Index(value=ast.Constant(value=param_uom)),
-                ctx=ast.Load()
-                )],
-                keywords=[]
+        return ast.If( 
+            test=ast.Compare(
+                left=ast.Constant(value=param_uom),
+                ops=[ast.In()],
+                comparators=[ast.Name(id='jparam', ctx=ast.Load())]
+            ),
+            body=[
+                ast.Assign(
+                targets=[ast.Name(id=val_name, ctx=ast.Store())],
+                value=ast.Call(
+                    func=ast.Name(id='int', ctx=ast.Load()),
+                    args=[ast.Subscript(
+                        value=ast.Name(id='jparam', ctx=ast.Load()),
+                        slice=ast.Index(value=ast.Constant(value=param_uom)),
+                        ctx=ast.Load()
+                        )],
+                        keywords=[]
+                    )
+                ),
+            ],
+            orelse=[]
+        )
+    return ast.If( 
+        test=ast.Compare(
+            left=ast.Constant(value=param_uom),
+            ops=[ast.In()],
+            comparators=[ast.Name(id='jparam', ctx=ast.Load())]
+        ),
+        body=[
+            ast.Assign(
+            targets=[ast.Name(id=val_name, ctx=ast.Store())],  # Variable 
+            value=ast.Subscript(
+                value=ast.Name(id='jparam', ctx=ast.Load()),  # The dictionary 'jparam'
+                slice=ast.Index(value=ast.Constant(value=param_uom)),  # Key 
+                ctx=ast.Load()  # Context for the Subscript
+                )
             )
-        )
-    return ast.Assign(
-        targets=[ast.Name(id=val_name, ctx=ast.Store())],  # Variable 
-        value=ast.Subscript(
-            value=ast.Name(id='jparam', ctx=ast.Load()),  # The dictionary 'jparam'
-            slice=ast.Index(value=ast.Constant(value=param_uom)),  # Key 
-            ctx=ast.Load()  # Context for the Subscript
-        )
+        ],
+        orelse=[]
     )
 
 def astInitBody(impl_class_name:str):

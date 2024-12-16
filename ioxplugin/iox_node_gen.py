@@ -48,6 +48,10 @@ class IoXNodeGen():
                 added_jparams=True
             
             out.append(ast_util.astCommandParamAssignment(f'{param.id}.uom{editor.uom}', param.id))
+            if len(editor.extendedEditors) > 0:
+                for ed in editor.extendedEditors:
+                    out.append(ast_util.astCommandParamAssignment(f'{param.id}.uom{ed.uom}', param.id))
+
             impl_args[param.getValidFunctionBodyName()]=param.id
             if is_property:
                 body = ast_util.astPHSetPropertyFunc(command_name.replace('set','update'), param.id)

@@ -1,4 +1,4 @@
-import ast, astor
+import ast, astor, json
 from .nodedef import NodeDefDetails, NodeProperties
 from .commands import CommandDetails, CommandParam
 from .log import PLUGIN_LOGGER
@@ -8,6 +8,26 @@ from .uom import UOMs
 from .editor import Editors
 from .iox_controller_template import CONTROLLER_TEMPLATE_BODY, CONTROLLER_TEMPLATE_HEADER
 
+
+class IoXImplCommand():
+    """
+        Simple class that holds names and args for implementation commands
+    """
+
+    def __init__(self, name, args):
+        self.name=name.replace('__','')
+        self.args=args
+
+    def dump(self):
+        try:
+            arg_list=[]
+            if 'query' not in self.name:
+                for argv in self.args.values():
+                    arg_list.append(argv.replace('_','').lower()) 
+            return ast_util.create_impl_command(self.name, arg_list)
+        except Exception as ex:
+            pass
+
 class IoXNodeGen():
     def __init__(self, nodedef:NodeDefDetails, path:str):
         if nodedef == None or path == None:
@@ -16,6 +36,8 @@ class IoXNodeGen():
 
         self.nodedef = nodedef
         self.path = path
+        self.impl_commands=[]
+
  
     def create_command_body(self, command:CommandDetails, command_name):
         if command == None:
@@ -54,7 +76,7 @@ class IoXNodeGen():
 
             impl_args[param.getValidFunctionBodyName()]=param.id
             if is_property:
-                body = ast_util.astPHSetPropertyFunc(command_name.replace('set','update'), param.id)
+                body = ast_util.astPHSetPropertyFunc(command_name.replace('__set','update'), param.id)
                 for stmt in body:
                     out.append(stmt)
                 break
@@ -65,6 +87,8 @@ class IoXNodeGen():
             if body:
                 for stmt in body:
                     out.append(stmt)
+
+        self.impl_commands.append(IoXImplCommand(command_name,impl_args))
 
         error.append(ast_util.astLogger("error", "failed parsing parameters ... "))
         error.append(ast_util.astReturnBoolean(False))
@@ -299,35 +323,33 @@ class IoXNodeGen():
             ## Now queryriver
             command_name=f"query{getValidName(driver['name'])}"
             update_name=f"update{getValidName(driver['name'])}"
+            self.impl_commands.append(IoXImplCommand(command_name,[driver['driver']]))
             query_commands.append(command_name)
-            body = ast_util.astPHQueryPropertyFunc(update_name, driver['driver'])
+            #body = ast_util.astPHQueryPropertyFunc(update_name, driver['driver'])
 
-            if not isinstance(body, list):
-                body = [body]
-
+            #if not isinstance(body, list):
+            #    body = [body]
+#
             #return_stmt = ast.Return(value=query_driver_call)  # Return the result of update 
-            method = ast.FunctionDef(
-            name=command_name,
-            args=ast.arguments(
-                args=[ast.arg(arg='self')],
-                defaults=[],
-                kwonlyargs=[], kw_defaults=[], vararg=None, kwarg=None
-            ),
-            body=body,
-            keywords=[],
-            decorator_list=[]
-            )
-            if not self.nodedef.isController:
-                class_def.body.append(method)
-
-        if len (query_commands) > 0 and not self.nodedef.isController:
-            class_def.body.append(ast_util.astQueryAllMethod(query_commands)) 
+#            method = ast.FunctionDef(
+#            name=command_name,
+#            args=ast.arguments(
+#                args=[ast.arg(arg='self')],
+#                defaults=[],
+#                kwonlyargs=[], kw_defaults=[], vararg=None, kwarg=None
+#            ),
+#            body=body,
+#            keywords=[],
+#            decorator_list=[]
+#            )
+#            if not self.nodedef.isController:
+#                class_def.body.append(method)
 
         #now make the commands
         for command in commands:
             cmd = self.nodedef.commands.acceptCommands[command['id']]
             pass_stmt = ast.Pass()
-            command_name=getValidName(command['name'],False)
+            command_name=f"__{getValidName(command['name'],False)}"
             body = self.create_command_body(cmd, command_name)
             if not isinstance(body, list):
                 body = [body]
@@ -348,19 +370,31 @@ class IoXNodeGen():
             if not self.nodedef.isController:
                 class_def.body.append(method)
 
+
         # Print the AST dump to verify
         #print(ast.dump(class_def, indent=4))
         if not self.nodedef.isController:
+
             class_def.body.append(ast_util.astComment('This is a list of commands that were defined in the nodedef'))
             # Add the drivers list
             commands_list = ast.Assign(
             targets=[ast.Name(id='commands', ctx=ast.Store())],
             value= ast.Dict(
                         keys=[ast.Str(s=f"{command['id']}") for command in commands],
-                        values=[ast.Name(id=f"{getValidName(command['name'],False)}", ctx=ast.Load()) for command in commands]
+                        values=[ast.Name(id=f"__{getValidName(command['name'],False)}", ctx=ast.Load()) for command in commands]
                     ) 
             )
             class_def.body.append(commands_list)
+            class_def.body.append(ast_util.astComment('    '))
+            if len (query_commands) > 0 and not self.nodedef.isController:
+                class_def.body.append(ast_util.astQueryAllMethod(query_commands)) 
+
+            class_def.body.append(ast_util.astComment('    '))
+            class_def.body.append(ast_util.astComment('Your implementations go below and will NOT be touched'))
+            for impl_command in self.impl_commands:
+                class_def.body.append(impl_command.dump())
+
+
 
         with open(file_path, 'a') as file:
             python_code = astor.to_source(class_def)

@@ -1297,95 +1297,80 @@ def astPHQueryPropertyFunc(update_method, property):
 
 #protocol handler
 def astPHSetPropertyFunc(update_method, property):
-    
-    body=[
-    # Outer if statement
-        ast.If(
-              test=ast.Attribute(
-                value=ast.Name(id='self', ctx=ast.Load()),
-                attr='protocolHandler',
-                ctx=ast.Load()
-        ),
-        body=[
-            # Inner if statement
-            ast.If(
-                test=ast.Call(
-                    func=ast.Attribute(
-                            value=ast.Attribute(
-                                value=ast.Name(id='self', ctx=ast.Load()),
-                                attr='protocolHandler',
-                                ctx=ast.Load()
-                            ),
-                            attr='setProperty',
-                            ctx=ast.Load()
-                    ),
-                    args=[
-                        ast.Name(id='self', ctx=ast.Load()),
-                        ast.Constant(value=property),
-                        ast.Name(id=property, ctx=ast.Load())
-                    ],
-                    keywords=[]
-                ),
-                body=[
-                    # Method call within the inner if statement
-                    ast.Expr(
-                        value=ast.Call(
-                            func=ast.Attribute(
-                                value=ast.Name(id='self', ctx=ast.Load()),
-                                attr=update_method,
-                                ctx=ast.Load()
-                            ),
-                            args=[
-                                ast.Name(id=property, ctx=ast.Load()),
-                                ast.Constant(value=True)
-                            ],
-                            keywords=[]
-                        )
-                    ),
-                    # Return statement within the inner if statement
-                    ast.Return(value=ast.Constant(value=True))
-                ],
-                orelse=[]
-            )
-        ],
-        orelse=[],
-    ),
-    ast.Return(value=ast.Constant(value=False))
-    ]
-    return body
-
-def astPHProcessCommandFunc(command_name, args):
-
-    arg_nodes = [ast.Name(id='self', ctx=ast.Load()),ast.Constant(value=command_name) ] 
+    set_method=update_method.replace('update','set')
+    #command_name=command_name.replace('__','')
     #for arg in args_array:
     #    arg_nodes.append(ast.Name(id=arg, ctx=ast.Load))
     # Create AST node for function call
     return_statement = ast.Return(
             value=ast.Call(
-            func=ast.Name(id='self.protocolHandler.processCommand', ctx=ast.Load()),
-            args= arg_nodes,
-            keywords=[
-                ast.keyword(
-                    arg=key,
-                    value=ast.Name(id=val, ctx=ast.Load())
-                ) for key, val in args.items()
-            ]
+            func=ast.Name(id=f'self.{set_method}', ctx=ast.Load()),
+            args= [
+                ast.Name(id=property, ctx=ast.Load)
+            ],
+            keywords=[]
         )
     )
+    return [return_statement]
 
-    body=[
-    # Outer if statement
-        ast.If(
-              test=ast.Attribute(
-              value=ast.Name(id='self', ctx=ast.Load()),
-              attr='protocolHandler',
-              ctx=ast.Load()
-        ),
-        body=[
-            return_statement
+def astPHProcessCommandFunc(command_name, args):
+
+    command_name=command_name.replace('__','')
+    #for arg in args_array:
+    #    arg_nodes.append(ast.Name(id=arg, ctx=ast.Load))
+    # Create AST node for function call
+    return_statement = ast.Return(
+            value=ast.Call(
+            func=ast.Name(id=f'self.{command_name}', ctx=ast.Load()),
+            args= [
+                ast.Name(id=val, ctx=ast.Load)for key, val in args.items()
+            ],
+            keywords=[]
+        )
+    )
+    return [return_statement]
+
+
+def create_impl_command(command_name, args):
+    """
+    Creates an AST for a Python function with a try/except block.
+
+    Args:
+        function_name (str): The name of the imple command to create.
+        args (list): A list of argument names
+
+    """
+    # Create AST nodes for arguments
+    command_args = ast.arguments(
+        posonlyargs=[],  # No positional-only arguments
+        args=[ast.arg(arg=arg, annotation=None) for arg in args],  # Positional arguments
+        vararg=None,  # No *args
+        kwonlyargs=[],  # No keyword-only arguments
+        kw_defaults=[],  # No defaults for keyword-only args
+        defaults=[]  # No default values
+    )
+
+    # Create the try/except block
+    try_block = ast.Try(
+        body=[ast.Return(value=ast.Constant(value=True))],  # return True in try block
+        handlers=[
+            ast.ExceptHandler(
+                type=None,  # Catch all exceptions
+                name=None,
+                body=[ast.Return(value=ast.Constant(value=False))]  # return False in except block
+            )
         ],
-        orelse=[],
-    ),
-    ast.Return(value=ast.Constant(value=False))
-    ]
-    return body
+        orelse=[],  # No else block
+        finalbody=[]  # No finally block
+    )
+
+    # Create the FunctionDef node
+    function_def = ast.FunctionDef(
+        name=command_name,
+        args=command_args,
+        body=[try_block],
+        decorator_list=[],
+        returns=None
+    )
+
+    return function_def

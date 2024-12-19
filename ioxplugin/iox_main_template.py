@@ -7,7 +7,6 @@ IOX_MAIN_TEMPLATE='''
 import udi_interface, os, sys, json, time,shutil
 import version
 from ioxplugin import Plugin
-from __PROTOCOL_HANDLER_FILE__ import __PROTOCOL_HANDLER_CLASS__
 
 PLUGIN_FILE_NAME = '__PLUGIN_FILE_NAME__'
 PLUGIN_FILE_NAME_DEST = f"{os.getcwd()}/{PLUGIN_FILE_NAME}"
@@ -42,9 +41,7 @@ if __name__ == '__main__':
             plugin.toIoX()
             plugin.generateCode(path='./')
             from __CONTROLLER_NODE_FILE__ import __CONTROLLER_NODE_CLASS__
-            protocolHandler = __PROTOCOL_HANDLER_CLASS__(plugin)
-            controller = __CONTROLLER_NODE_CLASS__(polyglot, protocolHandler)
-            protocolHandler.setController(controller)
+            controller = __CONTROLLER_NODE_CLASS__(polyglot, plugin)
             polyglot.ready()
             polyglot.runForever()
     

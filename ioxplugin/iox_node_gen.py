@@ -170,19 +170,6 @@ class IoXNodeGen():
 
         defaults=[self.nodedef.parent if self.nodedef.parent else self.nodedef.id,  self.nodedef.id,  self.nodedef.name]
         class_def.body.append(ast_util.astAddClassInit(self.nodedef.isController, defaults, None))
-        if self.nodedef.isController:
-            pass
-            #set protocol handler
-            #class_def.body.append(ast_util.astSetPluginFunc())
-            #class_def.body.append(ast_util.astConfigFunc())
-            #class_def.body.append(ast_util.astStartFunc())
-            #class_def.body.append(ast_util.astStopFunc())
-            #class_def.body.append(ast_util.astPollFunc())
-            #class_def.body.append(ast_util.astAddAllNodesFunc())
-            #class_def.body.append(ast_util.astAddNodeFunc())
-        else:
-            #set protocol handler
-            class_def.body.append(ast_util.astSetPluginFunc())
 
         #create update and get methods
         query_commands=[]
@@ -266,7 +253,8 @@ class IoXNodeGen():
                         ast.Name(id=f"\"{driver['driver']}\"", ctx=ast.Load()),  # First, driver id
                         ast.Name(id='value', ctx=ast.Load()),        # Second, value
                         ast.Name(id=f"{driver['uom']}", ctx=ast.Load()) ,    # Third uom
-                        ast.Name(id='force', ctx=ast.Load())          # Whether or not to force update/boolean
+                        ast.Name(id='force', ctx=ast.Load()),         # Whether or not to force update/boolean
+                        ast.Name(id='text', ctx=ast.Load()),          # Freeform text 
                     ],
                     keywords=[],
                     decorator_list=[]
@@ -275,9 +263,15 @@ class IoXNodeGen():
             method = ast.FunctionDef(
             name=f"update{getValidName(driver['name'])}",
             args=ast.arguments(
-                args=[ast.arg(arg='self'), ast.arg(arg='value'), ast.arg(arg='force', annotation=ast.Name(id='bool', ctx=ast.Load()))],
-                defaults=[],
-                kwonlyargs=[], kw_defaults=[], vararg=None, kwarg=None
+                args=[ast.arg(arg='self'), ast.arg(arg='value'), ast.arg(arg='force', annotation=ast.Name(id='bool', ctx=ast.Load())), ast.arg(arg='text', annotation=ast.Name(id='str', ctx=ast.Load))],
+                defaults=[
+                          ast.Constant(value=None),  # Default value for 'force'
+                          ast.Constant(value=None)  # Default value for 'text'
+
+                ],
+                kwonlyargs=[], 
+                kw_defaults=[], 
+                vararg=None, kwarg=None
             ),
             body=[
                # ast_util.astComment(f"Use this method to update {getValidName(driver['name'])} in IoX"),
@@ -325,7 +319,6 @@ class IoXNodeGen():
             update_name=f"update{getValidName(driver['name'])}"
             self.impl_commands.append(IoXImplCommand(command_name,[driver['driver']]))
             query_commands.append(command_name)
-            #body = ast_util.astPHQueryPropertyFunc(update_name, driver['driver'])
 
             #if not isinstance(body, list):
             #    body = [body]

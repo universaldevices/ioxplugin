@@ -15,7 +15,6 @@ from .iox_profile import ProfileWriter
 from .iox_node_gen import IoXNodeGen
 from .main_gen import PluginMain
 from .protocol import Protocol
-from .iox_node_impl_gen import IoXNodeImplGen
 import argparse
 
 
@@ -178,11 +177,6 @@ class Plugin:
             main.create()
             main.generateRequirements()
             main.generateVersion()
-
-            #now generate the proto handler/impl
-            node_impl_gen=IoXNodeImplGen(path, self.getPythonPHFileName(), self.getPythonPHClassName())
-            node_impl_gen.create()
-
 
 
         except Exception as ex:

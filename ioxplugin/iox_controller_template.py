@@ -296,10 +296,7 @@ CONTROLLER_TEMPLATE_BODY='''
     ###
     commands = {'discover': discover, 'x_query': __query}
 
-    ######## DO NOT MODIFY THIS LINE#########
-    ###
-    ###Nothing below this line is updated####
-    ###
+    """########WARNING: DO NOT MODIFY THIS LINE!!! NOTHING BELOW IS REGENERATED!#########"""
     
     #############################
     ###### START|STOP ###########

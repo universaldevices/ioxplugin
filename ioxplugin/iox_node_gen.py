@@ -1,4 +1,5 @@
-import ast, astor, json
+import ast, astor, json, os
+from pathlib import Path
 from .nodedef import NodeDefDetails, NodeProperties
 from .commands import CommandDetails, CommandParam
 from .log import PLUGIN_LOGGER
@@ -7,6 +8,8 @@ from ioxplugin import ast_util
 from .uom import UOMs
 from .editor import Editors
 from .iox_controller_template import CONTROLLER_TEMPLATE_BODY, CONTROLLER_TEMPLATE_HEADER
+IMPL_DIVIDER_AST='########WARNING: DO NOT MODIFY THIS LINE!!! NOTHING BELOW IS REGENERATED!#########'
+IMPL_DIVIDER=f'"""{IMPL_DIVIDER_AST}"""'
 
 
 class IoXImplCommand():
@@ -97,6 +100,8 @@ class IoXNodeGen():
 
     def create(self, children):
         file_path=f'{self.path}/{self.nodedef.getPythonFileName()}'
+
+        implementation = self.__get_implementation(file_path, IMPL_DIVIDER) 
         with open(file_path, 'w') as file:
             if not self.nodedef.isController:
                 imports = ast_util.astCreateImports()
@@ -382,10 +387,11 @@ class IoXNodeGen():
             if len (query_commands) > 0 and not self.nodedef.isController:
                 class_def.body.append(ast_util.astQueryAllMethod(query_commands)) 
 
-            class_def.body.append(ast_util.astComment('    '))
-            class_def.body.append(ast_util.astComment('Your implementations go below and will NOT be touched'))
-            for impl_command in self.impl_commands:
-                class_def.body.append(impl_command.dump())
+            if not implementation:
+                class_def.body.append(ast_util.astComment('    '))
+                class_def.body.append(ast_util.astComment(IMPL_DIVIDER_AST))
+                for impl_command in self.impl_commands:
+                    class_def.body.append(impl_command.dump())
 
 
 
@@ -393,8 +399,36 @@ class IoXNodeGen():
             python_code = astor.to_source(class_def)
             file.write(python_code)
             if self.nodedef.isController:
-                file.write(CONTROLLER_TEMPLATE_BODY)
+                if implementation:
+                    head,_ = self.__get_implementation_from_string(CONTROLLER_TEMPLATE_BODY,IMPL_DIVIDER)
+                    if (head):
+                        file.write('\n    ')
+                        file.write (head)
+                else:
+                    file.write(CONTROLLER_TEMPLATE_BODY)
+            
+            if implementation:
+                file.write('\n    ')
+                file.write(implementation)
 
         return class_def
+
+    def __get_implementation(self, file_path, delimiter):
+        if not Path(file_path).is_file():
+            return None
+
+        with open(file_path, 'r') as file:
+            content = file.read()
+            before, after = self.__get_implementation_from_string(content, delimiter)
+            return after
+
+    def __get_implementation_from_string(self, content, delimiter):
+        delimiter_pos = content.find(delimiter)
+        if delimiter_pos != -1:
+            before = content[:delimiter_pos].strip()
+            after = content[delimiter_pos:].strip()  # Include the delimiter
+            return before,after
+        else:
+            return None
 
     

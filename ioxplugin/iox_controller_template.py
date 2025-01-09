@@ -139,6 +139,16 @@ CONTROLLER_TEMPLATE_BODY='''
             LOGGER.error(str(x))
             return False
 
+    def __removeNodeDoneHandler(self, node):
+        try:
+            if node['nodeDefId'] == self.id:
+                return True
+            return self.nodeRemoved(node)
+
+        except ValueError as err:
+            LOGGER.error(str(x))
+            return False
+
     def __configDoneHandler(self):
         rc = False
         if self.oauthService:
@@ -401,10 +411,9 @@ CONTROLLER_TEMPLATE_BODY='''
             LOGGER.error(str(ex))
             return False
 
-
     def nodeRemoved(self, node)->bool:
         """
-        This method is called when a new node as been removed from the system
+        This method is called when a node as been removed from the system
         """
         try:
             ###if you stored your nodes a dictionary, delete them 

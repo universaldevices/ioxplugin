@@ -369,6 +369,11 @@ def astInitBodyController():
         )),
         ast.Expr(value=ast.Call(
             func=ast.Attribute(value=ast.Attribute(value=ast.Name(id='self', ctx=ast.Load()), attr='poly', ctx=ast.Load()), attr='subscribe', ctx=ast.Load()),
+            args=[ast.Attribute(value=ast.Name(id='polyglot', ctx=ast.Load()), attr='DELNODEDONE', ctx=ast.Load()), ast.Attribute(value=ast.Name(id='self', ctx=ast.Load()), attr='__removeNodeDoneHandler', ctx=ast.Load())],
+            keywords=[]
+        )),
+        ast.Expr(value=ast.Call(
+            func=ast.Attribute(value=ast.Attribute(value=ast.Name(id='self', ctx=ast.Load()), attr='poly', ctx=ast.Load()), attr='subscribe', ctx=ast.Load()),
             args=[ast.Attribute(value=ast.Name(id='polyglot', ctx=ast.Load()), attr='CUSTOMNS', ctx=ast.Load()), ast.Attribute(value=ast.Name(id='self', ctx=ast.Load()), attr='__customNSHandler', ctx=ast.Load())],
             keywords=[]
         )),

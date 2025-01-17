@@ -300,11 +300,13 @@ CONTROLLER_TEMPLATE_BODY='''
         except Exception as ex:
             LOGGER.error(f'failed updating custom param ...' )
 
+    def __discover(self):
+        return self.discover()
 
     ###
     # This is a list of commands that were defined in the nodedef
     ###
-    commands = {'discover': discover, 'x_query': __query}
+    commands = {'discover': __discover, 'x_query': __query}
 
     """########WARNING: DO NOT MODIFY THIS LINE!!! NOTHING BELOW IS REGENERATED!#########"""
     

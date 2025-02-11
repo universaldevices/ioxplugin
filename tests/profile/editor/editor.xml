@@ -1,0 +1,10 @@
+<editors><editor id="onlevel">
+<range uom="51" min="0" max="100"/>
+</editor>
+<editor id="ramprate">
+<range uom="139" min="0" max="600"/>
+</editor>
+<editor id="CTL_BOOL">
+<range uom="25" min="0" max="1" nls="NLSIX_CTL_BOOL"/>
+</editor>
+</editors>

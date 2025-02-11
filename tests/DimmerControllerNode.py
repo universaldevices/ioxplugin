@@ -1,4 +1,4 @@
-CONTROLLER_TEMPLATE_HEADER='''
+
 import udi_interface, os, shutil, sys, json, time, threading
 from udi_interface import OAuth
 LOGGER = udi_interface.LOGGER
@@ -6,9 +6,45 @@ Custom = udi_interface.Custom
 from ioxplugin import Plugin, OAuthService
 
 DATA_PATH='./data'
-'''
+from DimmerNode import DimmerNode
+class DimmerControllerNode(udi_interface.Node):
+    id = 'dimmercontroll'
+    """This is a list of properties that were defined in the nodedef"""
+    drivers = [{'driver': 'ST', 'value': 0, 'uom': 25, 'name': 'Status'}]
+    children = [{'node_class': 'DimmerNode', 'id': 'dimmer', 'name':
+        'Dimmer', 'parent': 'dimmercontroll'}]
 
-CONTROLLER_TEMPLATE_BODY='''
+    def __init__(self, polyglot, plugin, controller='dimmercontroll',
+        address='dimmercontroll', name='Dimmer Controller'):
+        super().__init__(polyglot, controller, address, name)
+        self.plugin = plugin
+        self.Parameters = Custom(polyglot, 'customparams')
+        self.poly.addNode(self, conn_status='ST')
+        self.oauthService = None
+        self.poly.subscribe(polyglot.START, self.__start, address)
+        self.poly.subscribe(polyglot.CUSTOMPARAMS, self.parameterHandler)
+        self.poly.subscribe(polyglot.POLL, self.__poll)
+        self.poly.subscribe(polyglot.STOP, self.__stop)
+        self.poly.subscribe(polyglot.CONFIG, self.__configHandler)
+        self.poly.subscribe(polyglot.CONFIGDONE, self.__configDoneHandler)
+        self.poly.subscribe(polyglot.ADDNODEDONE, self.__addNodeDoneHandler)
+        self.poly.subscribe(polyglot.DELNODEDONE, self.__removeNodeDoneHandler)
+        self.poly.subscribe(polyglot.CUSTOMNS, self.__customNSHandler)
+        self.poly.subscribe(polyglot.CUSTOMDATA, self.customDataHandler)
+        self.poly.subscribe(polyglot.DISCOVER, self.discover)
+        self.poly.subscribe(polyglot.BONJOUR, self.__bonjourHandler)
+        self.configDone = threading.Condition()
+        self.__initOAuth()
+        self.configDoneAlready = False
+
+    def getUOM(self, driver: str):
+        try:
+            for driver_def in self.drivers:
+                if driver_def['driver'] == driver:
+                    return driver_def['uom']
+            return None
+        except Exception as ex:
+            return None
 
     def __initOAuth(self):
         if self.plugin and self.plugin.meta and self.plugin.meta.getEnableOAUTH2():
@@ -238,7 +274,7 @@ CONTROLLER_TEMPLATE_BODY='''
         with the correct node.
         The address is the address of the node.
         """
-        return self.poly.getNode(address)
+        return self.controller.poly.getNode(address)
 
     
     def addNode(self, address:str, nodeDefId:str, name:str, parent:str=None):
@@ -285,7 +321,7 @@ CONTROLLER_TEMPLATE_BODY='''
         self.updateCustomParam(myKey, "my value" )
         """ 
         try:
-            return Custom(self.poly, key)
+            return Custom(self.controller.poly, key)
         except Exception as ex:
             LOGGER.error(f'create custom param failed ...')
             return None
@@ -307,7 +343,6 @@ CONTROLLER_TEMPLATE_BODY='''
     # This is a list of commands that were defined in the nodedef
     ###
     commands = {'discover': __discover, 'x_query': __query}
-
     """########WARNING: DO NOT MODIFY THIS LINE!!! NOTHING BELOW IS REGENERATED!#########"""
     
     #############################
@@ -536,4 +571,3 @@ CONTROLLER_TEMPLATE_BODY='''
             return
         except Exception as ex:
             LOGGER.error(str(ex))
-'''

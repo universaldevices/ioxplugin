@@ -37,6 +37,7 @@ MAX_RECONNECT_DELAY = 60
 
 
 DEVELOPER_TOKEN_URL_BASE="https://pg3store.isy.io/v2/developer?developer="
+DEVELOPER_TOKEN_URL_BASE_NEW="https://pg3store.isy.io/v2/developer/new?developer="
 LOCAL_STORE_URL="https://localhost:3000/v1"
 LOCAL_STORE_URL_INSERT=f"{LOCAL_STORE_URL}/insert"
 STORE_URL_LIST=f"{LOCAL_STORE_URL}/list?store="
@@ -641,6 +642,15 @@ class PluginStoreOps:
 
             response = requests.get(url, verify=False )
             if response.status_code != 200:
+                if response.status_code == 404:
+                    #try creating a new one
+                    url = f"{DEVELOPER_TOKEN_URL_BASE_NEW}{emailAddress}"
+                    PLUGIN_LOGGER.info(f"failed getting a token for {emailAddress}, status = {response.status_code}. Will try requesting a new one.")
+                    response = requests.get(url, verify=False )
+                    if response.status_code != 200:
+                        PLUGIN_LOGGER.error(f"failed getting a token for {emailAddress}, status = {response.status_code}")
+                        return None
+
                 PLUGIN_LOGGER.error(f"failed getting a token for {emailAddress}, status = {response.status_code}")
                 return None
 

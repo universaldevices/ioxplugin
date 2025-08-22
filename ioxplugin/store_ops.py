@@ -651,9 +651,6 @@ class PluginStoreOps:
                         PLUGIN_LOGGER.error(f"failed getting a token for {emailAddress}, status = {response.status_code}")
                         return None
 
-                PLUGIN_LOGGER.error(f"failed getting a token for {emailAddress}, status = {response.status_code}")
-                return None
-
             content = response.json()
 
             return content ['token']

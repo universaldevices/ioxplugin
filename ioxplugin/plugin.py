@@ -46,7 +46,6 @@ class Plugin:
             PLUGIN_LOGGER.critical("plugin file does not exist ... ")
             return
 
-        self.profileWriter=ProfileWriter(True, self.path)
 
         try:
             self.isValid=self.validate_json(schema, plugin_file)
@@ -75,18 +74,19 @@ class Plugin:
             PLUGIN_LOGGER.critical("invalid json file ... ")
             return False
 
+        profileWriter=ProfileWriter(True, self.path)
         try:
             nodedefs, nls = self.nodedefs.toIoX()
             if nodedefs:
-                self.profileWriter.writeToNodeDef(nodedefs)
+                profileWriter.writeToNodeDef(nodedefs)
             if nls:
-                self.profileWriter.writeToNLS(nls)
+                profileWriter.writeToNLS(nls)
 
             editors, nls = self.editors.toIoX()
             if editors:
-                self.profileWriter.writeToEditor(editors)
+                profileWriter.writeToEditor(editors)
             if nls:
-                self.profileWriter.writeToNLS(nls)
+                profileWriter.writeToNLS(nls)
         except Exception as ex:
             PLUGIN_LOGGER.critical(str(ex))
 

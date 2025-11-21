@@ -177,6 +177,22 @@ def astCommandQueryParams(command):
         )
     )
 
+    value_assign=ast.Assign(
+            targets=[ast.Name(id='value', ctx=ast.Store())],
+            value=ast.Call(
+                func=ast.Attribute(
+                    value=ast.Name(id='command', ctx=ast.Load()),
+                    attr='get',
+                    ctx=ast.Load()
+                ),
+                args=[
+                    ast.Constant(value='value'),
+                    ast.Constant(value=None)
+                ],
+                keywords=[]
+            )
+        )
+
     # Assignment: jparam = json.loads(query)
     jparam_assign = ast.Assign(
         targets=[ast.Name(id='jparam', ctx=ast.Store())],
@@ -187,7 +203,7 @@ def astCommandQueryParams(command):
         )
     )
 
-    return [query_assign, jparam_assign]
+    return [query_assign, jparam_assign, value_assign]
 
 #toInt whether or not convert to int
 def astCommandParamAssignment(param_uom, val_name, toInt=True):
@@ -213,7 +229,22 @@ def astCommandParamAssignment(param_uom, val_name, toInt=True):
                     )
                 ),
             ],
-            orelse=[]
+            orelse=[
+                    ast.If(
+                        test=ast.Name(id='value', ctx=ast.Load()),
+                        body=[
+                            ast.Assign(
+                                targets=[ast.Name(id=val_name, ctx=ast.Store())],
+                                value=ast.Call(
+                                func=ast.Name(id='int', ctx=ast.Load()),
+                                args=[ast.Name(id='value', ctx=ast.Load())],
+                                keywords=[]
+                                )
+                            )
+                        ],
+                        orelse=[]
+                    )
+            ]
         )
     return ast.If( 
         test=ast.Compare(

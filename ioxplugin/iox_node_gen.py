@@ -429,6 +429,6 @@ class IoXNodeGen():
             after = content[delimiter_pos:].strip()  # Include the delimiter
             return before,after
         else:
-            return None
+            return None, None
 
     

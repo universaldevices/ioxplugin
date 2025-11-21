@@ -1,5 +1,5 @@
 from setuptools import setup, find_packages
-ud_plugin_version="1.5.6" 
+ud_plugin_version="1.5.7" 
 
 setup(
     name='ioxplugin',

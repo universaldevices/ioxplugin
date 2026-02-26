@@ -299,6 +299,17 @@ CONTROLLER_TEMPLATE_BODY='''
             key = value
         except Exception as ex:
             LOGGER.error(f'failed updating custom param ...' )
+    
+    def sendPushNotification(self, title:str, body:str):
+        """
+        Send push notifications to UD Mobile
+        """
+        if title == None or body == None:
+            return
+        try:
+            self.poly.udm_alert(title, body)
+        except exception as ex:
+            LOGGER.error(str(ex))
 
     def __discover(self):
         return self.discover()
@@ -536,19 +547,5 @@ CONTROLLER_TEMPLATE_BODY='''
         except Exception as ex:
             LOGGER.error(str(ex))
 
-    #############################
-    ###### Notifications ########
-    #############################
-
-    def sendPushNotification(self, title:str, body:str):
-        """
-        Send push notifications to UD Mobile
-        """
-        if title == None or body == None:
-            return
-        try:
-            self.poly.udm_alert(title, body)
-        except exception as ex:
-            LOGGER.error(str(ex))
         
 '''

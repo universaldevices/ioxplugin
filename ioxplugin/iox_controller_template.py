@@ -408,7 +408,6 @@ CONTROLLER_TEMPLATE_BODY='''
             #self.nodes[node.address] = node
             ###
             return True
-            return True
         except Exception as ex:
             LOGGER.error(str(ex))
             return False
@@ -536,4 +535,20 @@ CONTROLLER_TEMPLATE_BODY='''
             return
         except Exception as ex:
             LOGGER.error(str(ex))
+
+    #############################
+    ###### Notifications ########
+    #############################
+
+    def sendPushNotification(self, title:str, body:str):
+        """
+        Send push notifications to UD Mobile
+        """
+        if title == None or body == None:
+            return
+        try:
+            self.poly.udm_alert(title, body)
+        except exception as ex:
+            LOGGER.error(str(ex))
+        
 '''

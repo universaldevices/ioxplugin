@@ -12,9 +12,10 @@ import time
 curdir = os.curdir
 
 #plugin_path=(f"{curdir}/tests")
-plugin_path=(f"/home/admin/workspace/plugin-dev/oadr31")
-#storeOps=PluginStoreOps('Local')
-#storeOps.addToStore(plugin_path, "tech@universal-devices.com", "admin", "/usr/home/admin/workspace/ioxplugin/tests")
+plugin_path=(f"/home/admin/workspace/ioxplugin/tests")
+#plugin=Plugin(f"{plugin_path}/dimmer.iox_plugin.json")
+storeOps=PluginStoreOps('Local', plugin_path)
+storeOps.addToStore(f"{plugin_path}/dimmer.iox_plugin.json", "tech@universal-devices.com", "admin")
 
 #plugin=Plugin(f"{plugin_path}/shelly.iox_plugin.json")
 #plugin=Plugin(f"{plugin_path}/dimmer.iox_plugin.json")

@@ -18,7 +18,23 @@
           "worksOnEisy":true,
           "requiresIoXAccess": false,
           "requirements": [],
-          "version": "1.0.0"
+          "version": "1.0.0",
+          "customParams":{
+            "hello":"ud",
+            "how":"are",
+            "you":"?",
+            "yes":1
+          },
+          "oauthParams":{
+            "client": "me",
+            "secret": "secret",
+            "expiry": "tomorrow"
+          },
+          "hardwareConfig":
+          {
+            "filename":"hwconfig.conf"
+          },
+          "customData": "any free form text/data you use for your plugin."
     },
     "editors": [
         {

@@ -232,6 +232,30 @@ class PluginMetaData:
         except Exception as ex:
             return False
 
+    def getCustomParams(self):
+        try:
+            return self.metadata['customParams']
+        except Exception as ex:
+            return None
+
+    def getOAuthParams(self):
+        try:
+            return self.metadata['oauthParams']
+        except Exception as ex:
+            return None
+
+    def getHardwareConfig(self):
+        try:
+            return self.metadata['hardwareConfig']
+        except Exception as ex:
+            return None
+
+    def getCustomData(self):
+        try:
+            return self.metadata['customData']
+        except Exception as ex:
+            return None
+        
     def getInstalledSlot(self):
         '''
             Returns the slot number in which this plugin 
@@ -294,7 +318,7 @@ class PluginMetaData:
         if self.getLicenseLink():
             lic = self.getLicenseLink()
 
-        return {
+        out = {
             "uuid":str(uuid1),
             "name":self.getName(),
             "author":self.getPublisher(),
@@ -317,6 +341,37 @@ class PluginMetaData:
             "license":lic,
             "desc":desc
         }
+
+        custom_params=self.getCustomParams()
+        if custom_params:
+            try:
+            #    json.loads(custom_params)
+                out['customParams']=custom_params
+            except Exception as ex:
+                IoXPluginLoggedException(level='error', message=str(ex))
+
+        oauth_params=self.getOAuthParams()
+        if oauth_params:
+            try:
+                out['oauth']=oauth_params
+            except Exception as ex:
+                IoXPluginLoggedException(level='error', message=str(ex))
+
+        hardware_config = self.getHardwareConfig()
+        if hardware_config:
+            try:
+                out['devd']=hardware_config
+            except Exception as ex:
+                IoXPluginLoggedException(level='error', message=str(ex))
+
+        custom_data = self.getCustomData()
+        if custom_data:
+            try:
+                out['nsdata']=custom_data
+            except Exception as ex:
+                IoXPluginLoggedException(level='error', message=str(ex))
+
+        return out
 
     def save(self, path:str):
         '''

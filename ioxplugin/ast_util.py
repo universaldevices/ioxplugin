@@ -630,7 +630,7 @@ def create_impl_command(command_name, args):
     # Create AST nodes for arguments
     command_args = ast.arguments(
         posonlyargs=[],  # No positional-only arguments
-        args=[ast.arg(arg=arg, annotation=None) for arg in args],  # Positional arguments
+        args=[ast.arg(arg='self', annotation=None)] + [ast.arg(arg=arg, annotation=None) for arg in args],  # Class methods must include self first
         vararg=None,  # No *args
         kwonlyargs=[],  # No keyword-only arguments
         kw_defaults=[],  # No defaults for keyword-only args

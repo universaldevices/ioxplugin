@@ -37,6 +37,48 @@ CONTROLLER_TEMPLATE_BODY='''
         except Exception as ex:
             LOGGER.error(str(ex))
 
+    def __handleCustomRequest(self, request):
+        """
+        This method is called when a custom request is received.
+        """
+        try:
+              # Process the custom request here
+              # request is a dictionary with the following keys:
+              # 'requestId': unique identifier for the request
+              # 'payload': the payload of the request
+              # To return the payload as is
+              # self.poly.customResponse(data['requestId'], data['payload'])
+
+              # To return an error message (Defaults to HTTP error 500)
+              # self.poly.customResponseError(data['requestId'], 'My error message')
+
+              # To return an error message and a custom status code
+              # self.poly.customResponseError(data['requestId'], errorMessage='Request not valid', status=400)
+
+            requestId = request.get('requestId', None)
+            payload = request.get('payload', None)
+            if requestId is None:
+                LOGGER.error("Request not valid - missing requestId")
+                return
+            tool_name = payload.get('tool_name', None)
+            if not tool_name:
+                LOGGER.error("Missing 'tool_name' in payload")
+                self.poly.customResponseError(requestId, errorMessage="Missing 'tool_name' in payload", status=400)
+                return
+
+            result = asyncio.run(self.customRequestHandler(requestId, tool_name, payload))
+
+            if result is None or (not isinstance(result, dict)): 
+                LOGGER.error("No data found for the given parameters or invalid result format (needs to be a dictionary)")
+                self.poly.customResponseError(requestId, errorMessage="No data found for the given parameters", status=404)
+                return
+
+            json_result = json.dumps(result, default=str)  # Convert datetime objects to string
+            self.poly.customResponse(requestId, {'result': json_result})
+        except Exception as ex:
+            LOGGER.error(str(ex))
+            return False
+
     def __start(self):
         LOGGER.info(f'Starting... ')
         try:
@@ -136,7 +178,7 @@ CONTROLLER_TEMPLATE_BODY='''
             return self.addNodeDone(node)
 
         except ValueError as err:
-            LOGGER.error(str(x))
+            LOGGER.error(str(err))
             return False
 
     def __removeNodeDoneHandler(self, node):
@@ -146,7 +188,7 @@ CONTROLLER_TEMPLATE_BODY='''
             return self.nodeRemoved(node)
 
         except ValueError as err:
-            LOGGER.error(str(x))
+            LOGGER.error(str(err))
             return False
 
     def __configDoneHandler(self):
@@ -308,7 +350,7 @@ CONTROLLER_TEMPLATE_BODY='''
             return
         try:
             self.poly.udm_alert(title, body)
-        except exception as ex:
+        except Exception as ex:
             LOGGER.error(str(ex))
 
     def __discover(self):
@@ -546,6 +588,39 @@ CONTROLLER_TEMPLATE_BODY='''
             return
         except Exception as ex:
             LOGGER.error(str(ex))
+    
+    def customRequestHandler(self, request_id, tool_name:str, payload:dict)->dict: 
+        """
+        This method is called when a custom request is received.
+        :param request_id: The unique identifier for the request
+        :param tool_name: The name of the tool that was called
+        :param payload: The payload of the request
+        :return: A dictionary containing the result of the request
+        """
+        try:
+            # Process the custom request here
+            # payload is what the llm is calling you with 
+            # tool_name is the name of the tool that was called (it's also included in the payload)
+            # 'payload': the payload of the request
+
+            # You must either return a dictionary or None.
+            # if None is returned, or return error and error message (Defaults to HTTP error 500), 
+            # you need to use this method:
+            # self.poly.customResponseError(data['requestId'], 'My error message')
+
+            # To return an error message and a custom status code
+            # self.poly.customResponseError(data['requestId'], errorMessage='Request not valid', status=400)
+
+            # Do your processin here
+
+            return {
+                'result': 'hello world' # Replace with actual result
+            }
+            return result
+
+        except Exception as ex:
+            LOGGER.error(str(ex))
+            return False
 
         
 '''
